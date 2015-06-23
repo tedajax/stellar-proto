@@ -1,5 +1,16 @@
 require 'input'
 require 'game'
+require 'log'
+
+function math.clamp(v, min, max)
+    if v < min then
+        return min
+    elseif v > max then
+        return max
+    else
+        return v
+    end
+end
 
 function S(v)
     return (v * Screen.pixels_per_meter) * Screen.scale_x
@@ -27,7 +38,7 @@ function love.load()
     Screen.height = love.graphics.getHeight()
     Screen.base_width = 1280
     Screen.base_height = 720
-    Screen.pixels_per_meter = 32
+    Screen.pixels_per_meter = 1
     Screen.scale_x = Screen.width / Screen.base_width
     Screen.scale_y = Screen.height / Screen.base_height
 
@@ -49,15 +60,19 @@ function love.load()
 
     Game = create_game()
     Game:init()
+
+    Log = create_log()
 end
 
 function love.update(dt)
     Game:update(dt)
     Input:update(dt)
+    Log:update(dt)
 end
 
 function love.draw()
     Game:render()
+    Log:render()
 end
 
 function love.keypressed(key)

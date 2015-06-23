@@ -9,9 +9,9 @@ function create_npc()
     self.destroy_flag = false
 
     self.position = Vec2(0, 0)
-    self.radius = 0.25
+    self.radius = 8
 
-    self.speed = 5
+    self.speed = 260
     self.velocity = Vec2(0, 0)
 
     self.is_selected = false
