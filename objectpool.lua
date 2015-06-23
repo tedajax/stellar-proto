@@ -84,6 +84,17 @@ function create_object_pool(create_func, capacity)
         end
     end
 
+    self.filter = function(self, func)
+        assert(type(func) == "function", "Attempt to filter with invalid function.")
+        local result = {}
+        for i = 1, self.capacity do
+            if self.objects[i].active and func(self.objects[i]) then
+                table.insert(result, self.objects[i])
+            end
+        end
+        return result
+    end
+
     return self
 end
 
