@@ -3,6 +3,7 @@ require 'game'
 require 'log'
 
 function math.clamp(v, min, max)
+    print(v.." "..min.." "..max)
     if v < min then
         return min
     elseif v > max then

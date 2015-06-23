@@ -31,6 +31,8 @@ function create_player()
         local velocity = Vec2(h, v)
         velocity = velocity * self.acceleration * dt
 
+        self.body:applyLinearImpulse(velocity.x, velocity.y)
+
         local lvx, lvy = self.body:getLinearVelocity()
 
         if h == 0 then
@@ -45,8 +47,6 @@ function create_player()
             math.clamp(lvx, -self.speed, self.speed),
             math.clamp(lvy, -self.speed, self.speed)
         )
-
-        self.body:applyLinearImpulse(velocity.x, velocity.y)
 
         self.position.x = self.body:getX()
         self.position.y = self.body:getY()
