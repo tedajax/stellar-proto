@@ -35,7 +35,12 @@ function create_npc()
         else
             love.graphics.setColor(255, 255, 255)
         end
-        love.graphics.circle("fill", X(self.position.x), Y(self.position.y), S(self.radius))
+        love.graphics.circle(
+            "fill",
+            X(self.position.x),
+            Y(self.position.y),
+            S(self.radius)
+        )
     end
 
     return self

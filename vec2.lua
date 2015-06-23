@@ -29,12 +29,18 @@ function vec2.__unm(a)
 end
 
 function vec2.__add(a,b)
-    assert(isvec2(a) and isvec2(b), "Add: wrong argument types (<vec2> expected)")
+    assert(
+        isvec2(a) and isvec2(b),
+        "Add: wrong argument types (<vec2> expected)"
+    )
     return new(a.x+b.x, a.y+b.y)
 end
 
 function vec2.__sub(a,b)
-    assert(isvec2(a) and isvec2(b), "Sub: wrong argument types (<vec2> expected)")
+    assert(
+        isvec2(a) and isvec2(b),
+        "Sub: wrong argument types (<vec2> expected)"
+    )
     return new(a.x-b.x, a.y-b.y)
 end
 
@@ -44,13 +50,19 @@ function vec2.__mul(a,b)
     elseif type(b) == "number" then
         return new(b*a.x, b*a.y)
     else
-        assert(isvec2(a) and isvec2(b), "Mul: wrong argument types (<vec2> or <number> expected)")
+        assert(
+            isvec2(a) and isvec2(b),
+            "Mul: wrong argument types (<vec2> or <number> expected)"
+        )
         return a.x*b.x + a.y*b.y
     end
 end
 
 function vec2.__div(a,b)
-    assert(isvec2(a) and type(b) == "number", "wrong argument types (expected <vec2> / <number>)")
+    assert(
+        isvec2(a) and type(b) == "number",
+        "wrong argument types (expected <vec2> / <number>)"
+    )
     return new(a.x / b, a.y / b)
 end
 
@@ -67,7 +79,10 @@ function vec2.__le(a,b)
 end
 
 function vec2.permul(a,b)
-    assert(isvec2(a) and isvec2(b), "permul: wrong argument types (<vec2> expected)")
+    assert(
+        isvec2(a) and isvec2(b),
+        "permul: wrong argument types (<vec2> expected)"
+    )
     return new(a.x*b.x, a.y*b.y)
 end
 
@@ -84,30 +99,40 @@ function vec2:magnitude()
 end
 
 local function dist(a, b)
-    assert(isvec2(a) and isvec2(b), "dist: wrong argument types (<vec2> expected)")
+    assert(
+        isvec2(a) and isvec2(b),
+        "dist: wrong argument types (<vec2> expected)"
+    )
     local dx = a.x - b.x
     local dy = a.y - b.y
     return sqrt(dx * dx + dy * dy)
 end
 
 local function distsq(a, b)
-    assert(isvec2(a) and isvec2(b), "distsq: wrong argumen types (<vec2> expected)")
+    assert(
+        isvec2(a) and isvec2(b),
+        "distsq: wrong argumen types (<vec2> expected)"
+    )
     local dx = a.x - b.x
     local dy = a.y - b.y
     return dx * dx + dy * dy
 end
 
 local function lerp(a, b, t)
-    assert(isvec2(a) and isvec2(b), "lerp: wrong argument types (<vec2> expected)")
-
+    assert(
+        isvec2(a) and isvec2(b),
+        "lerp: wrong argument types (<vec2> expected)"
+    )
     local lx = a.x + (b.x - a.x) * t
     local ly = a.y + (b.y - a.y) * t
     return new(lx, ly)
 end
 
 function vec2:clamp(min, max)
-    assert(isvec2(min) and isvec2(max), "clamp: wrong argument types (<vec2> expected)")
-
+    assert(
+        isvec2(min) and isvec2(max),
+        "clamp: wrong argument types (<vec2> expected)"
+    )
     if self.x < min.x then self.x = min.x end
     if self.x > max.x then self.x = max.x end
     if self.y < min.y then self.y = min.y end
