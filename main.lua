@@ -1,6 +1,7 @@
 require 'input'
 require 'game'
 require 'log'
+require 'camera'
 
 function math.clamp(v, min, max)
     print(v.." "..min.." "..max)
@@ -13,35 +14,12 @@ function math.clamp(v, min, max)
     end
 end
 
-function S(v)
-    return (v * Screen.pixels_per_meter) * Screen.scale_x
-end
-
-function SX(v)
-    return (v * Screen.pixels_per_meter) * Screen.scale_x
-end
-
-function SY(v)
-    return (v * Screen.pixels_per_meter) * Screen.scale_y
-end
-
-function X(x)
-    return (x * Screen.pixels_per_meter) * Screen.scale_x + (Screen.width / 2)
-end
-
-function Y(y)
-    return (y * Screen.pixels_per_meter) * Screen.scale_y + (Screen.height / 2)
-end
-
 function love.load()
     Screen = {}
     Screen.width = love.graphics.getWidth()
     Screen.height = love.graphics.getHeight()
     Screen.base_width = 1280
     Screen.base_height = 720
-    Screen.pixels_per_meter = 1
-    Screen.scale_x = Screen.width / Screen.base_width
-    Screen.scale_y = Screen.height / Screen.base_height
 
     Input = create_input()
 
@@ -62,6 +40,10 @@ function love.load()
     Game = create_game()
     Game:init()
 
+    Camera = create_camera()
+    Camera.base_zoom = Screen.base_width / Screen.width
+    Camera:look_at(0, 0)
+
     Log = create_log()
 end
 
@@ -72,7 +54,9 @@ function love.update(dt)
 end
 
 function love.draw()
+    Camera:push()
     Game:render()
+    Camera:pop()
     Log:render()
 end
 

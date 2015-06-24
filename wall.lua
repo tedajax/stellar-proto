@@ -38,10 +38,10 @@ function create_wall()
     self.render = function(self)
         love.graphics.setColor(0, 255, 0)
         love.graphics.rectangle("fill",
-            X(self.position.x - self.width / 2),
-            Y(self.position.y - self.height / 2),
-            SX(self.width),
-            SY(self.height))
+            self.position.x - self.width / 2,
+            self.position.y - self.height / 2,
+            self.width,
+            self.height)
     end
 
     return self

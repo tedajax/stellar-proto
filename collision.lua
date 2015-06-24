@@ -57,23 +57,23 @@ function create_collision()
 
                     if shape:getType() == "circle" then
                         local r = shape:getRadius()
-                        love.graphics.circle("line", X(bx), Y(by), S(r))
+                        love.graphics.circle("line", bx, by, r)
                     elseif shape:getType() == "polygon" then
                         local points = { shape:getPoints() }
                         for i = 1, #points - 2, 2 do
                             love.graphics.line(
-                                X(points[i] + bx),
-                                Y(points[i + 1] + by),
-                                X(points[i + 2] + bx),
-                                Y(points[i + 3] + by)
+                                points[i] + bx,
+                                points[i + 1] + by,
+                                points[i + 2] + bx,
+                                points[i + 3] + by
                             )
                         end
 
                         love.graphics.line(
-                            X(points[1] + bx),
-                            Y(points[2] + by),
-                            X(points[#points - 1] + bx),
-                            Y(points[#points] + by)
+                            points[1] + bx,
+                            points[2] + by,
+                            points[#points - 1] + bx,
+                            points[#points] + by
                         )
                     end
 
@@ -82,10 +82,10 @@ function create_collision()
                         love.graphics.setColor(255, 255, 0)
                         love.graphics.rectangle(
                             "line",
-                            X(tx),
-                            Y(ty),
-                            SX(bx - tx),
-                            SY(by - ty)
+                            tx,
+                            ty,
+                            bx - tx,
+                            by - ty
                         )
                     end
                 end

@@ -13,7 +13,7 @@ function create_npc()
 
     self.speed = 280
     self.acceleration = 10000
-    self.friction = 1
+    self.friction = 0.1
     self.velocity = Vec2(0, 0)
 
     self.is_selected = false
@@ -68,9 +68,9 @@ function create_npc()
         end
         love.graphics.circle(
             "fill",
-            X(self.position.x),
-            Y(self.position.y),
-            S(self.radius)
+            self.position.x,
+            self.position.y,
+            self.radius
         )
     end
 

@@ -10,6 +10,7 @@ function create_game()
 
     self.init = function(self)
         self.player = create_player()
+        create_player_controller(self.player)
         self.npc_manager = create_npc_manager(100)
         self.wall_manager = create_wall_manager(100)
 
@@ -17,7 +18,13 @@ function create_game()
             self.npc_manager:add(math.random(-300, 300), math.random(-150, 150))
         end
 
-        self.wall_manager:add(0, -320, 320, 32)
+        self.wall_manager:add(0, -355, 1280, 10)
+        self.wall_manager:add(0, 355, 1280, 10)
+        self.wall_manager:add(-635, 0, 10, 720)
+        self.wall_manager:add(635, 0, 10, 720)
+
+        self.wall_manager:add(-200, 260, 10, 200)
+        self.wall_manager:add(200, 260, 10, 200)
     end
 
     self.update = function(self, dt)
@@ -31,7 +38,7 @@ function create_game()
         self.npc_manager:render()
         self.wall_manager:render()
 
-        self.collision:debug_render()
+        --self.collision:debug_render()
     end
 
     return self
