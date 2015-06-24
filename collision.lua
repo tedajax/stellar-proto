@@ -34,7 +34,7 @@ function create_collision()
     -- end up forwarding to the right thing
     Collision = self
 
-    self.world = love.physics.newWorld(0, 0)
+    self.world = love.physics.newWorld(0, 1000)
 
     self.world:setCallbacks(on_begin, on_end, on_pre_solve, on_post_solve)
 
@@ -57,28 +57,33 @@ function create_collision()
 
                     if shape:getType() == "circle" then
                         local r = shape:getRadius()
-                        love.graphics.circle("line", bx, by, r)
+                        local cx, cy = shape:getPoint()
+                        love.graphics.circle("line", cx + bx, cy + by, r)
                     elseif shape:getType() == "polygon" then
+                        love.graphics.push()
+                        love.graphics.translate(bx, by)
+                        love.graphics.rotate(b:getAngle())
                         local points = { shape:getPoints() }
                         for i = 1, #points - 2, 2 do
                             love.graphics.line(
-                                points[i] + bx,
-                                points[i + 1] + by,
-                                points[i + 2] + bx,
-                                points[i + 3] + by
+                                points[i],
+                                points[i + 1],
+                                points[i + 2],
+                                points[i + 3]
                             )
                         end
 
                         love.graphics.line(
-                            points[1] + bx,
-                            points[2] + by,
-                            points[#points - 1] + bx,
-                            points[#points] + by
+                            points[1],
+                            points[2],
+                            points[#points - 1],
+                            points[#points]
                         )
+                        love.graphics.pop()
                     end
 
                     if show_aabb then
-                        local tx, ty, bx, by = shape:computeAABB(bx, by, 0)
+                        local tx, ty, bx, by = shape:computeAABB(bx, by, b:getAngle())
                         love.graphics.setColor(255, 255, 0)
                         love.graphics.rectangle(
                             "line",

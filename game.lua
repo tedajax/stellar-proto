@@ -18,13 +18,17 @@ function create_game()
             self.npc_manager:add(math.random(-300, 300), math.random(-150, 150))
         end
 
-        self.wall_manager:add(0, -355, 1280, 10)
-        self.wall_manager:add(0, 355, 1280, 10)
-        self.wall_manager:add(-635, 0, 10, 720)
-        self.wall_manager:add(635, 0, 10, 720)
+        local wall_width = 32
 
-        self.wall_manager:add(-200, 260, 10, 200)
-        self.wall_manager:add(200, 260, 10, 200)
+        self.wall_manager:add(0, -355, 1280, wall_width, 0)
+        self.wall_manager:add(0, 355, 1280, wall_width, 0)
+        self.wall_manager:add(-635, 0, 720, wall_width, 90)
+        self.wall_manager:add(635, 0, 720, wall_width, 90)
+
+        self.wall_manager:add(-400, 260, 200, wall_width, 90)
+        self.wall_manager:add(400, 260, 200, wall_width, 90)
+
+        self.wall_manager:add(225, 272, 400, wall_width, -30)
     end
 
     self.update = function(self, dt)
@@ -38,7 +42,7 @@ function create_game()
         self.npc_manager:render()
         self.wall_manager:render()
 
-        --self.collision:debug_render()
+        self.collision:debug_render(false)
     end
 
     return self

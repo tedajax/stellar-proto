@@ -11,21 +11,27 @@ function create_wall()
     self.position = Vec2(0, 0)
     self.width = 0
     self.height = 0
+    self.rotation = 0
 
     self.body = love.physics.newBody(Game.collision.world, 0, 0, "static")
     self.body:setActive(false)
     self.shape = nil
     self.fixture = nil
 
-    self.activate = function(self, x, y, w, h)
+    self.activate = function(self, x, y, length, width, r)
         self.position = Vec2(x, y)
-        self.width = w
-        self.height = h
+        self.width = length
+        self.height = width
+        self.rotation = r or 0
 
         self.body:setX(x)
         self.body:setY(y)
         self.body:setActive(true)
-        self.shape = love.physics.newRectangleShape(0, 0, w, h)
+        self.body:setAngle(math.rad(self.rotation))
+        self.shape = love.physics.newRectangleShape(
+            0, 0,
+            self.width, self.height
+        )
         self.fixture = love.physics.newFixture(self.body, self.shape)
     end
 
@@ -36,12 +42,16 @@ function create_wall()
     end
 
     self.render = function(self)
+        love.graphics.push()
+        love.graphics.translate(self.position.x, self.position.y)
+        love.graphics.rotate(math.rad(self.rotation))
         love.graphics.setColor(0, 255, 0)
         love.graphics.rectangle("fill",
-            self.position.x - self.width / 2,
-            self.position.y - self.height / 2,
+            -self.width / 2,
+            -self.height / 2,
             self.width,
             self.height)
+        love.graphics.pop()
     end
 
     return self
@@ -53,7 +63,7 @@ function create_wall_manager(capacity)
     self.pool = create_object_pool(create_wall, capacity)
 
     self.add = function(self, ...)
-        self.pool:add(...)
+        return self.pool:add(...)
     end
 
     self.remove = function(self, wall)

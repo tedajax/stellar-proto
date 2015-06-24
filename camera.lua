@@ -77,8 +77,8 @@ function create_camera(x, y)
         )
         love.graphics.rotate(-math.rad(self.rotation))
         love.graphics.scale(
-            1 / (self.zoom + self.base_zoom),
-            1 / (self.zoom + self.base_zoom)
+            math.abs(1 / (self.zoom + self.base_zoom)),
+            math.abs(1 / (self.zoom + self.base_zoom))
         )
     end
 

@@ -4,24 +4,45 @@ function create_player()
     local self = {}
 
     self.position = Vec2(0, 0)
-    self.radius = 16
+    self.width = 16
+    self.height = 32
     self.select_radius = 64
-
 
     self.selected = {}
 
     self.controller = nil
 
     self.body = love.physics.newBody(Game.collision.world, 0, 0, "dynamic")
-    self.shape = love.physics.newCircleShape(self.radius)
+    self.body:setFixedRotation(true)
+
+    self.shape = love.physics.newRectangleShape(
+        0,
+        0,
+        self.width,
+        self.height - self.width / 2
+    )
     self.fixture = love.physics.newFixture(self.body, self.shape)
 
-    self.fixture:setUserData(self)
+    self.foot_shape = love.physics.newCircleShape(
+        0,
+        self.height / 2 - self.width / 4,
+        self.width / 2
+    )
+    self.foot_fixture = love.physics.newFixture(self.body, self.foot_shape)
+
+    -- self.fixture:setUserData(self)
+    self.foot_fixture:setUserData(self)
+
+    self.collision_count = 0
 
     self.on_collision_begin = function(self, other, coll)
+        self.collision_count = self.collision_count + 1
+        Log:log_info("Count: "..self.collision_count)
     end
 
     self.on_collision_end = function(self, other, coll)
+        self.collision_count = self.collision_count - 1
+        Log:log_info("Count: "..self.collision_count)
     end
 
     self.update = function(self, dt)
@@ -63,24 +84,24 @@ function create_player()
             "fill",
             self.position.x,
             self.position.y,
-            self.radius
+            self.width
         )
 
-        love.graphics.setColor(0, 255, 0, 127)
-        love.graphics.circle(
-            "fill",
-            self.position.x,
-            self.position.y,
-            self.select_radius
-        )
+        -- love.graphics.setColor(0, 255, 0, 127)
+        -- love.graphics.circle(
+        --     "fill",
+        --     self.position.x,
+        --     self.position.y,
+        --     self.select_radius
+        -- )
 
-        love.graphics.setColor(0, 255, 0, 255)
-        love.graphics.circle(
-            "line",
-            self.position.x,
-            self.position.y,
-            self.select_radius
-        )
+        -- love.graphics.setColor(0, 255, 0, 255)
+        -- love.graphics.circle(
+        --     "line",
+        --     self.position.x,
+        --     self.position.y,
+        --     self.select_radius
+        -- )
     end
 
     return self
@@ -103,7 +124,7 @@ function create_player_controller(player)
         local velocity = Vec2(h, v)
         velocity = velocity * self.acceleration * dt
 
-        self.player.body:applyLinearImpulse(velocity.x, velocity.y)
+        self.player.body:applyLinearImpulse(velocity.x, 0)
 
         local lvx, lvy = self.player.body:getLinearVelocity()
 
@@ -111,9 +132,9 @@ function create_player_controller(player)
             lvx = lvx * (1 - self.friction)
         end
 
-        if v == 0 then
-            lvy = lvy * (1 - self.friction)
-        end
+        -- if v == 0 then
+        --     lvy = lvy * (1 - self.friction)
+        -- end
 
         self.player.body:setLinearVelocity(
             math.clamp(lvx, -self.speed, self.speed),
