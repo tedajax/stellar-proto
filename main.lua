@@ -4,7 +4,6 @@ require 'log'
 require 'camera'
 
 function math.clamp(v, min, max)
-    print(v.." "..min.." "..max)
     if v < min then
         return min
     elseif v > max then

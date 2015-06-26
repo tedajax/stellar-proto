@@ -1,4 +1,5 @@
 Vec2 = require 'vec2'
+require 'movement'
 
 function create_player()
     local self = {}
@@ -113,33 +114,18 @@ function create_player_controller(player)
     self.player = player
     self.player.controller = self
 
-    self.speed = 320
-    self.acceleration = 10000
-    self.friction = 0.9
+    self.movement = create_movement(
+        self.player.body,
+        self.player.foot_shape
+    )
 
     self.update = function(self, dt)
-        local h = Input:get_axis("horizontal")
-        local v = Input:get_axis("vertical")
-
-        local velocity = Vec2(h, v)
-        velocity = velocity * self.acceleration * dt
-
-        self.player.body:applyLinearImpulse(velocity.x, 0)
-
-        local lvx, lvy = self.player.body:getLinearVelocity()
-
-        if h == 0 then
-            lvx = lvx * (1 - self.friction)
-        end
-
-        -- if v == 0 then
-        --     lvy = lvy * (1 - self.friction)
-        -- end
-
-        self.player.body:setLinearVelocity(
-            math.clamp(lvx, -self.speed, self.speed),
-            math.clamp(lvy, -self.speed, self.speed)
+        self.movement:set_input(
+            Input:get_axis("horizontal"),
+            Input:get_axis("vertical")
         )
+
+        self.movement:update(dt)
 
         self.player.position.x = self.player.body:getX()
         self.player.position.y = self.player.body:getY()

@@ -38,6 +38,26 @@ function create_collision()
 
     self.world:setCallbacks(on_begin, on_end, on_pre_solve, on_post_solve)
 
+    self.ray_cast = function(self, startpoint, endpoint)
+        local hit_list = {}
+
+        self.world:rayCast(
+            startpoint.x, startpoint.y,
+            endpoint.x, endpoint.y,
+            function(fixture, x, y, xn, yn, fraction)
+                local hit = {}
+                hit.position = Vec2(x, y)
+                hit.normal = Vec2(xn, yn)
+                hit.distance = fraction
+                table.insert(hit_list, hit)
+                print("hit")
+                return 1
+            end
+        )
+
+        return hit_list
+    end
+
     self.update = function(self, dt)
         self.world:update(dt)
     end
