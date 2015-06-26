@@ -15,7 +15,7 @@ function create_game()
         self.wall_manager = create_wall_manager(100)
 
         for i = 1, 10 do
-            self.npc_manager:add(math.random(-300, 300), math.random(-150, 150))
+            -- self.npc_manager:add(math.random(-300, 300), math.random(-150, 150))
         end
 
         local wall_width = 32

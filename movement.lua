@@ -13,13 +13,16 @@ function create_movement(body, feet)
     -- movement properties
     self.ground = {}
     self.ground.acceleration = 1000 -- horizontal acceleration on ground
-    self.ground.max_speed = 250 -- horizontal speed on ground
+    self.ground.max_speed = 400 -- horizontal speed on ground
     self.ground.friction = 0.5 -- how fast we slow down on the ground (horizontal)
 
     self.air = {}
-    self.air.acceleration = 100 -- horizontal acceleration in air
-    self.air.max_speed = 250
+    self.air.acceleration = 1000 -- horizontal acceleration in air
+    self.air.max_speed = 400
     self.air.friction = 0.5 -- how fast we slow down in air (horizontal)
+
+    self.jump_force = 25000
+    self.jump_requested = false
 
     self.is_on_ground = false
 
@@ -30,9 +33,15 @@ function create_movement(body, feet)
         self.input.y = y
     end
 
+    self.request_jump = function(self)
+        self.jump_requested = true
+    end
+
     self.check_on_ground = function(self)
-        local s = Vec2(feet:getPoint())
-        local e = s + Vec2(0, feet:getRadius() + 1)
+        local bx, by = self.body:getPosition()
+        local body_pos = Vec2(self.body:getPosition())
+        local s = Vec2(feet:getPoint()) + body_pos
+        local e = s + Vec2(0, feet:getRadius() + 10)
         local hits = Collision:ray_cast(s, e)
         self.is_on_ground = #hits > 0
         return self.is_on_ground
@@ -48,6 +57,10 @@ function create_movement(body, feet)
 
     self.update = function(self, dt)
         self:check_on_ground()
+
+        if self.is_on_ground and self.jump_requested then
+            self.body:applyForce(0, -self.jump_force)
+        end
 
         local acceleration = self:get_value("acceleration")
         local friction = self:get_value("friction")
@@ -69,6 +82,8 @@ function create_movement(body, feet)
             math.clamp(lvx, -max_speed, max_speed),
             lvy
         )
+
+        self.jump_requested = false
     end
 
     return self

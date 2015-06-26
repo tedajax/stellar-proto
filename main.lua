@@ -30,8 +30,8 @@ function love.load()
     Input:create_axis_binding("vertical", "up", -1)
     Input:create_axis_binding("vertical", "down", 1)
 
-    Input:add_button("select")
-    Input:create_button_binding("select", "z")
+    Input:add_button("jump")
+    Input:create_button_binding("jump", "z")
 
     Input:add_button("cancel")
     Input:create_button_binding("cancel", "x")
@@ -42,7 +42,7 @@ function love.load()
     Camera = create_camera()
     Camera.base_zoom = Screen.base_width / Screen.width
     Camera:look_at(0, 0)
-    Camera:zoom_in(5)
+    -- Camera:zoom_in(5)
 
     Log = create_log()
 end
@@ -51,7 +51,7 @@ function love.update(dt)
     Game:update(dt)
     Input:update(dt)
     Log:update(dt)
-    Camera:look_at(Game.player.position.x, Game.player.position.y)
+    -- Camera:look_at(Game.player.position.x, Game.player.position.y)
 end
 
 function love.draw()

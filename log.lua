@@ -75,12 +75,13 @@ end
 function create_log()
     local self = {}
 
-    self.pool = create_object_pool(create_log_message, 128)
+    self.pool = create_object_pool(create_log_message, 1024)
     self.log_time = 3
 
     self.current_index = 0
 
     self.log = function(self, level, message)
+        message = tostring(message)
         print("Log: "..message)
         self.pool:add(level, message, self.log_time, self.current_index)
         self.current_index = self.current_index + 1

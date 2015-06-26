@@ -7,9 +7,6 @@ function create_player()
     self.position = Vec2(0, 0)
     self.width = 16
     self.height = 32
-    self.select_radius = 64
-
-    self.selected = {}
 
     self.controller = nil
 
@@ -34,48 +31,15 @@ function create_player()
     -- self.fixture:setUserData(self)
     self.foot_fixture:setUserData(self)
 
-    self.collision_count = 0
-
     self.on_collision_begin = function(self, other, coll)
-        self.collision_count = self.collision_count + 1
-        Log:log_info("Count: "..self.collision_count)
     end
 
     self.on_collision_end = function(self, other, coll)
-        self.collision_count = self.collision_count - 1
-        Log:log_info("Count: "..self.collision_count)
     end
 
     self.update = function(self, dt)
         if self.controller ~= nil then
             self.controller:update(dt)
-        end
-
-
-        if Input:get_button_down("select") then
-            self:deselect()
-
-            self.selected = Game.npc_manager:get_all_in_radius(
-                self.position,
-                self.select_radius
-            )
-
-            for _, npc in ipairs(self.selected) do
-                npc.is_selected = true
-            end
-        end
-
-        if Input:get_button_down("cancel") then
-            self:deselect()
-        end
-    end
-
-    self.deselect = function(self)
-        for i, npc in ipairs(self.selected) do
-            npc.is_selected = false
-            npc.velocity.x = 0
-            npc.velocity.y = 0
-            self.selected[i] = nil
         end
     end
 
@@ -87,22 +51,6 @@ function create_player()
             self.position.y,
             self.width
         )
-
-        -- love.graphics.setColor(0, 255, 0, 127)
-        -- love.graphics.circle(
-        --     "fill",
-        --     self.position.x,
-        --     self.position.y,
-        --     self.select_radius
-        -- )
-
-        -- love.graphics.setColor(0, 255, 0, 255)
-        -- love.graphics.circle(
-        --     "line",
-        --     self.position.x,
-        --     self.position.y,
-        --     self.select_radius
-        -- )
     end
 
     return self
@@ -124,6 +72,10 @@ function create_player_controller(player)
             Input:get_axis("horizontal"),
             Input:get_axis("vertical")
         )
+
+        if Input:get_button_down("jump") then
+            self.movement:request_jump()
+        end
 
         self.movement:update(dt)
 

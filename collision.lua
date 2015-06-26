@@ -38,6 +38,9 @@ function create_collision()
 
     self.world:setCallbacks(on_begin, on_end, on_pre_solve, on_post_solve)
 
+    -- represents raycasts that were called this frame so we can debug them
+    self.frame_ray_casts = {}
+
     self.ray_cast = function(self, startpoint, endpoint)
         local hit_list = {}
 
@@ -50,10 +53,15 @@ function create_collision()
                 hit.normal = Vec2(xn, yn)
                 hit.distance = fraction
                 table.insert(hit_list, hit)
-                print("hit")
                 return 1
             end
         )
+
+        if #hit_list > 0 then
+            print(#hit_list)
+        end
+
+        table.insert(self.frame_ray_casts, { s = startpoint, e = endpoint })
 
         return hit_list
     end
@@ -116,6 +124,16 @@ function create_collision()
                 end
             end
         end
+
+        love.graphics.setColor(0, 255, 255)
+        for _, r in ipairs(self.frame_ray_casts) do
+            love.graphics.line(
+                r.s.x, r.s.y,
+                r.e.x, r.e.y
+            )
+        end
+
+        self.frame_ray_casts = {}
     end
 
     return self
