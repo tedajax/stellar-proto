@@ -20,6 +20,7 @@ function create_player()
         self.height - self.width / 2
     )
     self.fixture = love.physics.newFixture(self.body, self.shape)
+    self.fixture:setFriction(0)
 
     self.foot_shape = love.physics.newCircleShape(
         0,
