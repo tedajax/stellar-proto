@@ -33,8 +33,8 @@ function love.load()
     Input:add_button("jump")
     Input:create_button_binding("jump", "z")
 
-    Input:add_button("cancel")
-    Input:create_button_binding("cancel", "x")
+    Input:add_button("shoot")
+    Input:create_button_binding("shoot", "x")
 
     Game = create_game()
     Game:init()

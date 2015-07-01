@@ -12,16 +12,16 @@ function create_movement(body, feet)
 
     -- movement properties
     self.ground = {}
-    self.ground.acceleration = 1000 -- horizontal acceleration on ground
-    self.ground.max_speed = 400 -- horizontal speed on ground
+    self.ground.acceleration = 10000 -- horizontal acceleration on ground
+    self.ground.max_speed = 800 -- horizontal speed on ground
     self.ground.friction = 0.5 -- how fast we slow down on the ground (horizontal)
 
     self.air = {}
-    self.air.acceleration = 1000 -- horizontal acceleration in air
-    self.air.max_speed = 400
+    self.air.acceleration = 10000 -- horizontal acceleration in air
+    self.air.max_speed = 800
     self.air.friction = 0.5 -- how fast we slow down in air (horizontal)
 
-    self.jump_force = 25000
+    self.jump_force = 75000
     self.jump_requested = false
 
     self.is_on_ground = false

@@ -27,8 +27,6 @@ function create_game()
 
         self.wall_manager:add(-400, 260, 200, wall_width, 90)
         self.wall_manager:add(400, 260, 200, wall_width, 90)
-
-        self.wall_manager:add(225, 272, 400, wall_width, -30)
     end
 
     self.update = function(self, dt)

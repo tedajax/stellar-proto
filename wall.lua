@@ -62,6 +62,9 @@ function create_wall_manager(capacity)
 
     self.pool = create_object_pool(create_wall, capacity)
 
+    self.wall_width = 32
+    self.wall_height = 32
+
     self.add = function(self, ...)
         return self.pool:add(...)
     end
