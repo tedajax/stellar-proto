@@ -71,7 +71,8 @@ function create_player_controller(player)
     self.update = function(self, dt)
         self.movement:set_input(
             Input:get_axis("horizontal"),
-            Input:get_axis("vertical")
+            Input:get_axis("vertical"),
+            Input:get_button("jump")
         )
 
         if Input:get_button_down("jump") then

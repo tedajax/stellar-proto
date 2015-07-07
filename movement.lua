@@ -1,4 +1,5 @@
 Vec2 = require 'vec2'
+require 'log'
 
 function create_movement(body, feet)
     local self = {}
@@ -12,25 +13,28 @@ function create_movement(body, feet)
 
     -- movement properties
     self.ground = {}
-    self.ground.acceleration = 10000 -- horizontal acceleration on ground
+    self.ground.acceleration = 300 -- horizontal acceleration on ground
     self.ground.max_speed = 800 -- horizontal speed on ground
     self.ground.friction = 0.5 -- how fast we slow down on the ground (horizontal)
 
     self.air = {}
-    self.air.acceleration = 10000 -- horizontal acceleration in air
+    self.air.acceleration = 150 -- horizontal acceleration in air
     self.air.max_speed = 800
-    self.air.friction = 0.5 -- how fast we slow down in air (horizontal)
+    self.air.friction = 0.1 -- how fast we slow down in air (horizontal)
 
-    self.jump_force = 75000
+    self.jump_force = 120
+    self.jump_hold_force = 100
     self.jump_requested = false
 
     self.is_on_ground = false
+    self.is_jumping = false
 
-    self.input = { x = 0, y = 0 }
+    self.input = { x = 0, y = 0, jump = false }
 
-    self.set_input = function(self, x, y)
+    self.set_input = function(self, x, y, jump)
         self.input.x = x
         self.input.y = y
+        self.input.jump = jump or false
     end
 
     self.request_jump = function(self)
@@ -59,7 +63,21 @@ function create_movement(body, feet)
         self:check_on_ground()
 
         if self.is_on_ground and self.jump_requested then
-            self.body:applyForce(0, -self.jump_force)
+            self.is_jumping = true
+            self.body:applyLinearImpulse(0, -self.jump_force)
+        end
+
+        Log:debug(tostring(self.input.jump))
+
+        if self.is_jumping then
+            if self.input.jump then
+                local _, vy = self.body:getLinearVelocity()
+                if vy > 0 then
+                    self.body:applyForce(0, -self.jump_hold_force)
+                end
+            else
+                self.is_jumping = false
+            end
         end
 
         local acceleration = self:get_value("acceleration")

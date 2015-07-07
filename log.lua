@@ -72,11 +72,27 @@ function create_log_message()
     return self
 end
 
+function create_debug_message(index, msg)
+    local self = {}
+
+    self.index = index
+    self.message = msg
+
+    self.render = function(self, x, y, spacing)
+        love.graphics.setColor(255, 255, 0)
+        love.graphics.print(self.message, x, y, self.index * spacing)
+    end
+
+    return self
+end
+
 function create_log()
     local self = {}
 
     self.pool = create_object_pool(create_log_message, 1024)
     self.log_time = 3
+
+    self.debugs = {}
 
     self.current_index = 0
 
@@ -114,6 +130,10 @@ function create_log()
         end)
     end
 
+    self.debug = function(self, msg)
+        table.insert(self.debugs, create_debug_message(#self.debugs, msg))
+    end
+
     self.update = function(self, dt)
         self.pool:execute_obj_func("update", dt, self)
         self.pool:remove_flagged()
@@ -121,6 +141,11 @@ function create_log()
 
     self.render = function(self)
         self.pool:execute_obj_func("render", 5, 5, 20)
+
+        for _, d in ipairs(self.debugs) do
+            d:render(5, 5, 20)
+        end
+        self.debugs = {}
     end
 
     return self
