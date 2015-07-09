@@ -67,8 +67,6 @@ function create_movement(body, feet)
             self.body:applyLinearImpulse(0, -self.jump_force)
         end
 
-        Log:debug(tostring(self.input.jump))
-
         if self.is_jumping then
             if self.input.jump then
                 local _, vy = self.body:getLinearVelocity()
