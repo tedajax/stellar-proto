@@ -1,0 +1,15 @@
+{
+    "ground": {
+        "acceleration": 300,
+        "max_speed": 800,
+        "friction": 0.5
+    },
+    "air": {
+        "acceleration": 150,
+        "max_speed": 800,
+        "friction": 0.1
+    },
+
+    "jump_force": 120,
+    "jump_hold_force": 100
+}

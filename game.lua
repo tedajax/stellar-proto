@@ -12,7 +12,8 @@ function create_game()
 
     self.init = function(self)
         self.player = create_player()
-        create_player_controller(self.player)
+        local controller = create_player_controller(self.player)
+        controller:initialize()
         self.npc_manager = create_npc_manager(100)
 
         local jsonstr = love.filesystem.read("test.json")

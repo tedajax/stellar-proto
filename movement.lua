@@ -1,7 +1,7 @@
 Vec2 = require 'vec2'
 require 'log'
 
-function create_movement(body, feet)
+function create_movement(body, feet, propertiesObj)
     local self = {}
 
     self.body = body
@@ -12,23 +12,28 @@ function create_movement(body, feet)
     self.feet = feet
 
     -- movement properties
-    self.ground = {}
-    self.ground.acceleration = 300 -- horizontal acceleration on ground
-    self.ground.max_speed = 800 -- horizontal speed on ground
-    self.ground.friction = 0.5 -- how fast we slow down on the ground (horizontal)
+    self.properties = propertiesObj
 
-    self.air = {}
-    self.air.acceleration = 150 -- horizontal acceleration in air
-    self.air.max_speed = 800
-    self.air.friction = 0.1 -- how fast we slow down in air (horizontal)
+    -- properties object includes
+    -- self.properties.ground = {}
+    -- self.properties.ground.acceleration = 300 -- horizontal acceleration on ground
+    -- self.properties.ground.max_speed = 200 -- horizontal speed on ground
+    -- self.properties.ground.friction = 0.5 -- how fast we slow down on the ground (horizontal)
 
-    self.jump_force = 120
-    self.jump_hold_force = 100
+    -- self.properties.air = {}
+    -- self.properties.air.acceleration = 150 -- horizontal acceleration in air
+    -- self.properties.air.max_speed = 800
+    -- self.properties.air.friction = 0.1 -- how fast we slow down in air (horizontal)
+
+    -- self.properties.jump_force = 120
+    -- self.properties.jump_hold_force = 100
+
     self.jump_requested = false
 
     self.is_on_ground = false
     self.is_jumping = false
 
+    -- TODO: more robust input
     self.input = { x = 0, y = 0, jump = false }
 
     self.set_input = function(self, x, y, jump)
@@ -53,9 +58,9 @@ function create_movement(body, feet)
 
     self.get_value = function(self, name)
         if self.is_on_ground then
-            return self.ground[name]
+            return self.properties.ground[name]
         else
-            return self.air[name]
+            return self.properties.air[name]
         end
     end
 
@@ -64,7 +69,7 @@ function create_movement(body, feet)
 
         if self.is_on_ground and self.jump_requested then
             self.is_jumping = true
-            self.body:applyLinearImpulse(0, -self.jump_force)
+            self.body:applyLinearImpulse(0, -self.properties.jump_force)
         end
 
         if self.is_jumping then
@@ -100,6 +105,10 @@ function create_movement(body, feet)
         )
 
         self.jump_requested = false
+    end
+
+    self.setProperties = function(self, propertiesObj)
+        self.properties = propertiesObj
     end
 
     return self

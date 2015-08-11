@@ -1,4 +1,5 @@
-Vec2 = require 'vec2'
+local Vec2 = require 'vec2'
+local json = require 'json'
 require 'movement'
 
 function create_player()
@@ -63,10 +64,16 @@ function create_player_controller(player)
     self.player = player
     self.player.controller = self
 
-    self.movement = create_movement(
-        self.player.body,
-        self.player.foot_shape
-    )
+    self.movement = nil
+
+    self.initialize = function(self)
+        local movementProps = json.load("movement.json")
+        self.movement = create_movement(
+            self.player.body,
+            self.player.foot_shape,
+            movementProps
+        )
+    end
 
     self.update = function(self, dt)
         self.movement:set_input(

@@ -1,3 +1,4 @@
+local json = require 'json'
 require 'input'
 require 'game'
 require 'log'
@@ -64,6 +65,8 @@ end
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
+    elseif key == "m" then
+        Game.player.controller.movement:setProperties(json.load("movement.json"))
     end
 
     Input:on_key_down(key)

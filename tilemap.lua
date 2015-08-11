@@ -10,7 +10,8 @@ function create_tilemap(tilemapObj)
     self.tile_height = tilemapObj.tile_height
 
     local originObj = tilemapObj.origin or { x = -(self.width * self.tile_width) / 2, y = -(self.height * self.tile_height) / 2 }
-    self.origin = Vec2(originObj.x, originObj.y)
+    local offsetObj = tilemapObj.offset or { x = 0, y = 0 }
+    self.origin = Vec2(originObj.x, originObj.y) + Vec2(offsetObj.x, offsetObj.y)
 
     self.tiles = {}
 
