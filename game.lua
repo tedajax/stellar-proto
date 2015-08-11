@@ -1,7 +1,9 @@
+local json = require 'dkjson'
+local Vec2 = require 'vec2'
 require 'player'
 require 'npc'
-require 'wall'
 require 'collision'
+require 'tilemap'
 
 function create_game()
     local self = {}
@@ -12,21 +14,15 @@ function create_game()
         self.player = create_player()
         create_player_controller(self.player)
         self.npc_manager = create_npc_manager(100)
-        self.wall_manager = create_wall_manager(100)
+
+        local jsonstr = love.filesystem.read("test.json")
+        local tmapobj = json.decode(jsonstr, 1, nil)
+        self.tilemap = create_tilemap(tmapobj)
+        self.tilemap:recalculate()
 
         for i = 1, 10 do
             -- self.npc_manager:add(math.random(-300, 300), math.random(-150, 150))
         end
-
-        local wall_width = 32
-
-        self.wall_manager:add(0, -355, 1280, wall_width, 0)
-        self.wall_manager:add(0, 355, 1280, wall_width, 0)
-        self.wall_manager:add(-635, 0, 720, wall_width, 90)
-        self.wall_manager:add(635, 0, 720, wall_width, 90)
-
-        self.wall_manager:add(-400, 260, 200, wall_width, 90)
-        self.wall_manager:add(400, 260, 200, wall_width, 90)
     end
 
     self.update = function(self, dt)
@@ -38,7 +34,7 @@ function create_game()
     self.render = function(self)
         self.player:render()
         self.npc_manager:render()
-        self.wall_manager:render()
+        self.tilemap:render()
 
         -- self.collision:debug_render(false)
     end

@@ -81,5 +81,9 @@ function create_wall_manager(capacity)
         self.pool:execute_obj_func("render")
     end
 
+    self.clear = function(self)
+        self.pool:clear()
+    end
+
     return self
 end
