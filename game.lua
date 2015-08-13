@@ -1,4 +1,4 @@
-local json = require 'dkjson'
+local json = require 'json'
 local Vec2 = require 'vec2'
 require 'player'
 require 'npc'
@@ -16,8 +16,7 @@ function create_game()
         controller:initialize()
         self.npc_manager = create_npc_manager(100)
 
-        local jsonstr = love.filesystem.read("test.json")
-        local tmapobj = json.decode(jsonstr, 1, nil)
+        local tmapobj = json.load("test.json")
         self.tilemap = create_tilemap(tmapobj)
         self.tilemap:recalculate()
 

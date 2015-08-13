@@ -39,6 +39,13 @@ function create_player()
     self.on_collision_end = function(self, other, coll)
     end
 
+    self.set_position = function(self, pos)
+        self.position.x = pos.x
+        self.position.y = pos.y
+        self.body:setX(self.position.x)
+        self.body:setY(self.position.y)
+    end
+
     self.update = function(self, dt)
         if self.controller ~= nil then
             self.controller:update(dt)
@@ -95,6 +102,10 @@ function create_player_controller(player)
         --     npc.velocity.x = h
         --     npc.velocity.y = v
         -- end
+    end
+
+    self.set_position = function(self, pos)
+        self.player:setPosition(pos)
     end
 
     return self

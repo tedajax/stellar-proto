@@ -76,7 +76,7 @@ function create_movement(body, feet, propertiesObj)
             if self.input.jump then
                 local _, vy = self.body:getLinearVelocity()
                 if vy > 0 then
-                    self.body:applyForce(0, -self.jump_hold_force)
+                    self.body:applyForce(0, -self.properties.jump_hold_force)
                 end
             else
                 self.is_jumping = false
