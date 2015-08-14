@@ -58,10 +58,6 @@ function create_collision()
             end
         )
 
-        if #hit_list > 0 then
-            print(#hit_list)
-        end
-
         table.insert(self.frame_ray_casts, { s = startpoint, e = endpoint })
 
         return hit_list

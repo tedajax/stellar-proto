@@ -54,11 +54,12 @@ function create_player()
 
     self.render = function(self)
         love.graphics.setColor(255, 255, 255, 255)
-        love.graphics.circle(
+        love.graphics.rectangle(
             "fill",
-            self.position.x,
-            self.position.y,
-            self.width
+            self.position.x - self.width / 2,
+            self.position.y - self.height / 2,
+            self.width,
+            self.height
         )
     end
 

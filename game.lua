@@ -16,7 +16,7 @@ function create_game()
         controller:initialize()
         self.npc_manager = create_npc_manager(100)
 
-        local tmapobj = json.load("test.json")
+        local tmapobj = json.load("test2.json")
         self.tilemap = create_tilemap(tmapobj)
         self.tilemap:recalculate()
 

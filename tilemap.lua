@@ -19,7 +19,7 @@ function create_tilemap(tilemapObj)
         table.insert(self.tiles, tilemapObj.data[i])
     end
 
-    self.wall_manager = create_wall_manager(self.width * self.height)
+    self.wall_manager = create_wall_manager(self.width * self.height + 1)
 
     self.worldToTileSpace = function(self, wcoord)
         assert(Vec2.isvec2(wcoord))
@@ -38,8 +38,12 @@ function create_tilemap(tilemapObj)
         return w
     end
 
-    self.xyToIndex = function(self, pos)
-        return pos.y * self.width + pos.x + 1
+    self.xyToIndex = function(self, x, y)
+        return y * self.width + x + 1
+    end
+
+    self.vecToIndex = function(self, pos)
+        return self:xyToIndex(pos.x, pos.y)
     end
 
     self.indexToXy = function(self, index)
@@ -49,7 +53,7 @@ function create_tilemap(tilemapObj)
     end
 
     self.setTile = function(self, pos, value)
-        local i = self:xyToIndex(pos)
+        local i = self:vecToIndex(pos)
         self.tiles[i] = value
     end
 
@@ -57,6 +61,63 @@ function create_tilemap(tilemapObj)
     -- expensive, only call after setting tile data!
     self.recalculate = function(self)
         self.wall_manager:clear()
+
+        local usedTiles = {}
+        for i, _ in ipairs(self.tiles) do table.insert(usedTiles, false) end
+
+        local walls = {}
+
+        for current, v in ipairs(self.tiles) do
+            if v == 1 and usedTiles[current] == false then
+                local col, row = self:indexToXy(current):unpack()
+                local left = col
+                local right = left
+                for x = left + 1, self.width - 1 do
+                    local i = self:xyToIndex(x, math.floor(current / self.width))
+                    print(tostring(x).." "..tostring(i).." "..tostring(right))
+                    if usedTiles[i] == true or self.tiles[i] ~= 1 then
+                        print("done")
+                        break
+                    else
+                        right = right + 1
+                    end
+                end
+
+                print("left: "..tostring(left).."  right: "..tostring(right))
+
+                local top = row
+                local bottom = top
+                for y = top + 1, self.height do
+                    local goodRow = true
+                    for x = left, right do
+                        local i = self:xyToIndex(x, y)
+                        print(tostring(x).." "..tostring(y).." "..tostring(i).." "..tostring(self.tiles[i]).." "..tostring(usedTiles[i]))
+                        if self.tiles[i] ~= 1 or usedTiles[i] == true then
+                            goodRow = false
+                            break
+                        end
+                    end
+                    if goodRow then
+                        bottom = bottom + 1
+                    else
+                        break
+                    end
+                end
+                table.insert(walls, { l = left, r = right, t = top, b = bottom })
+                for x = left, right do
+                    for y = top, bottom do
+                        local i = self:xyToIndex(x, y)
+                        usedTiles[i] = true
+                    end
+                end
+            end
+        end
+
+        for i, w in ipairs(walls) do
+            print(tostring(w.l).." "..tostring(w.r).." "..tostring(w.t).." "..tostring(w.b))
+
+        end
+
         for i, v in ipairs(self.tiles) do
             if v == 1 then
                 local tcoord = self:indexToXy(i)
