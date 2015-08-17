@@ -11,23 +11,23 @@ function create_wall()
     self.position = Vec2(0, 0)
     self.width = 0
     self.height = 0
-    self.rotation = 0
 
     self.body = love.physics.newBody(Game.collision.world, 0, 0, "static")
     self.body:setActive(false)
     self.shape = nil
     self.fixture = nil
 
-    self.activate = function(self, x, y, length, width, r)
+    self.activate = function(self, l, r, t, b)
+        local x = (l + r) / 2
+        local y = (t + b) / 2
         self.position = Vec2(x, y)
-        self.width = length
-        self.height = width
-        self.rotation = r or 0
+        self.width = math.abs(r - l)
+        self.height = math.abs(b - t)
 
         self.body:setX(x)
         self.body:setY(y)
         self.body:setActive(true)
-        self.body:setAngle(math.rad(self.rotation))
+        self.body:setAngle(0)
         self.shape = love.physics.newRectangleShape(
             0, 0,
             self.width, self.height
@@ -44,7 +44,6 @@ function create_wall()
     self.render = function(self)
         love.graphics.push()
         love.graphics.translate(self.position.x, self.position.y)
-        love.graphics.rotate(math.rad(self.rotation))
         love.graphics.setColor(0, 255, 0)
         love.graphics.rectangle("fill",
             -self.width / 2,

@@ -1,4 +1,5 @@
 require 'wall'
+require 'util'
 Vec2 = require 'vec2'
 
 function create_tilemap(tilemapObj)
@@ -29,11 +30,13 @@ function create_tilemap(tilemapObj)
         return t
     end
 
-    self.tileToWorldSpace = function(self, tcoord)
+    self.tileToWorldSpace = function(self, tcoord, origin)
         assert(Vec2.isvec2(tcoord))
+        local origin = origin or "center"
+        local ox, oy = originNameValues(origin)
         local w = tcoord
-        w.x = w.x * self.tile_width + (self.tile_width / 2)
-        w.y = w.y * self.tile_height + (self.tile_height / 2)
+        w.x = w.x * self.tile_width + (self.tile_width * ox)
+        w.y = w.y * self.tile_height + (self.tile_height * oy)
         w = w + self.origin
         return w
     end
@@ -74,16 +77,12 @@ function create_tilemap(tilemapObj)
                 local right = left
                 for x = left + 1, self.width - 1 do
                     local i = self:xyToIndex(x, math.floor(current / self.width))
-                    print(tostring(x).." "..tostring(i).." "..tostring(right))
                     if usedTiles[i] == true or self.tiles[i] ~= 1 then
-                        print("done")
                         break
                     else
                         right = right + 1
                     end
                 end
-
-                print("left: "..tostring(left).."  right: "..tostring(right))
 
                 local top = row
                 local bottom = top
@@ -91,7 +90,6 @@ function create_tilemap(tilemapObj)
                     local goodRow = true
                     for x = left, right do
                         local i = self:xyToIndex(x, y)
-                        print(tostring(x).." "..tostring(y).." "..tostring(i).." "..tostring(self.tiles[i]).." "..tostring(usedTiles[i]))
                         if self.tiles[i] ~= 1 or usedTiles[i] == true then
                             goodRow = false
                             break
@@ -115,15 +113,9 @@ function create_tilemap(tilemapObj)
 
         for i, w in ipairs(walls) do
             print(tostring(w.l).." "..tostring(w.r).." "..tostring(w.t).." "..tostring(w.b))
-
-        end
-
-        for i, v in ipairs(self.tiles) do
-            if v == 1 then
-                local tcoord = self:indexToXy(i)
-                local wcoord = self:tileToWorldSpace(tcoord)
-                self.wall_manager:add(wcoord.x, wcoord.y, self.tile_width, self.tile_height, 0)
-            end
+            local tl = self:tileToWorldSpace(Vec2(w.l, w.t), "topleft")
+            local br = self:tileToWorldSpace(Vec2(w.r, w.b), "bottomright")
+            self.wall_manager:add(tl.x, br.x, tl.y, br.y)
         end
     end
 
