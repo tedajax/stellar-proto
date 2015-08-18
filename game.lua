@@ -36,7 +36,7 @@ function create_game()
         self.npc_manager:render()
         self.tilemap:render()
 
-        self.collision:debug_render(false)
+        -- self.collision:debug_render(false)
     end
 
     return self
