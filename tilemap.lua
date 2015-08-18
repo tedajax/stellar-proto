@@ -16,6 +16,8 @@ function create_tilemap(tilemapObj)
 
     self.tiles = {}
 
+    self.tile_image = love.graphics.newImage("assets/tile.png")
+
     for i = 1, self.width * self.height do
         table.insert(self.tiles, tilemapObj.data[i])
     end
@@ -120,7 +122,28 @@ function create_tilemap(tilemapObj)
     end
 
     self.render = function(self)
-        self.wall_manager:render()
+        for i, v in ipairs(self.tiles) do
+            if v == 1 then
+                local tcoord = self:indexToXy(i)
+                local wcoord = self:tileToWorldSpace(tcoord, "topleft")
+                love.graphics.draw(self.tile_image, wcoord.x, wcoord.y)
+            end
+        end
+    end
+
+    self.render_grid = function(self)
+        love.graphics.setColor(255, 255, 0)
+        for x = 0, self.width do
+            local t = self:tileToWorldSpace(Vec2(x, 0), "topleft")
+            local b = self:tileToWorldSpace(Vec2(x, self.height - 1), "bottomleft")
+            love.graphics.line(t.x, t.y, b.x, b.y)
+        end
+
+        for y = 0, self.height do
+            local l = self:tileToWorldSpace(Vec2(0, y), "topleft")
+            local r = self:tileToWorldSpace(Vec2(self.width - 1, y), "topright")
+            love.graphics.line(l.x, l.y, r.x, r.y)
+        end
     end
 
     return self
