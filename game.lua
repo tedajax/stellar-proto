@@ -20,6 +20,9 @@ function create_game()
         self.tilemap = create_tilemap(tmapobj)
         self.tilemap:recalculate()
 
+        local spawn_pos = self.tilemap:get_spawn_position()
+        self.player:set_position(spawn_pos)
+
         for i = 1, 10 do
             -- self.npc_manager:add(math.random(-300, 300), math.random(-150, 150))
         end

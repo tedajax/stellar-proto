@@ -2,6 +2,12 @@ require 'wall'
 require 'util'
 Vec2 = require 'vec2'
 
+TILE_TYPES = {
+    cEmpty = 0,
+    cWall = 1,
+    cSpawn = 2,
+}
+
 function create_tilemap(tilemapObj)
     local self = {}
 
@@ -16,7 +22,9 @@ function create_tilemap(tilemapObj)
 
     self.tiles = {}
 
-    self.tile_image = love.graphics.newImage("assets/tile.png")
+    self.spawn_point = 0
+
+    self.tile_image = love.graphics.newImage("assets/tile_orange.png")
 
     for i = 1, self.width * self.height do
         table.insert(self.tiles, tilemapObj.data[i])
@@ -24,7 +32,7 @@ function create_tilemap(tilemapObj)
 
     self.wall_manager = create_wall_manager(self.width * self.height + 1)
 
-    self.worldToTileSpace = function(self, wcoord)
+    self.world_to_tile_space = function(self, wcoord)
         assert(Vec2.isvec2(wcoord))
         local t = wcoord - self.origin
         t.x = math.floor(t.x / self.tile_width)
@@ -32,7 +40,7 @@ function create_tilemap(tilemapObj)
         return t
     end
 
-    self.tileToWorldSpace = function(self, tcoord, origin)
+    self.tile_to_world_space = function(self, tcoord, origin)
         assert(Vec2.isvec2(tcoord))
         local origin = origin or "center"
         local ox, oy = originNameValues(origin)
@@ -43,23 +51,31 @@ function create_tilemap(tilemapObj)
         return w
     end
 
-    self.xyToIndex = function(self, x, y)
+    self.xy_to_index = function(self, x, y)
         return y * self.width + x + 1
     end
 
-    self.vecToIndex = function(self, pos)
-        return self:xyToIndex(pos.x, pos.y)
+    self.vec_to_index = function(self, pos)
+        return self:xy_to_index(pos.x, pos.y)
     end
 
-    self.indexToXy = function(self, index)
+    self.index_to_xy = function(self, index)
         local x = (index - 1) % self.width
         local y = math.floor((index - 1) / self.width)
         return Vec2(x, y)
     end
 
     self.setTile = function(self, pos, value)
-        local i = self:vecToIndex(pos)
+        local i = self:vec_to_index(pos)
         self.tiles[i] = value
+    end
+
+    self.get_spawn_position = function(self)
+        if self.spawn_point < 1 then
+            return Vec2(0, 0)
+        else
+            return self:tile_to_world_space(self:index_to_xy(self.spawn_point), "centertop")
+        end
     end
 
     -- goes through the tile data and recreates walls and everything
@@ -73,12 +89,12 @@ function create_tilemap(tilemapObj)
         local walls = {}
 
         for current, v in ipairs(self.tiles) do
-            if v == 1 and usedTiles[current] == false then
-                local col, row = self:indexToXy(current):unpack()
+            if v == TILE_TYPES.cWall and usedTiles[current] == false then
+                local col, row = self:index_to_xy(current):unpack()
                 local left = col
                 local right = left
                 for x = left + 1, self.width - 1 do
-                    local i = self:xyToIndex(x, math.floor(current / self.width))
+                    local i = self:xy_to_index(x, math.floor(current / self.width))
                     if usedTiles[i] == true or self.tiles[i] ~= 1 then
                         break
                     else
@@ -91,7 +107,7 @@ function create_tilemap(tilemapObj)
                 for y = top + 1, self.height do
                     local goodRow = true
                     for x = left, right do
-                        local i = self:xyToIndex(x, y)
+                        local i = self:xy_to_index(x, y)
                         if self.tiles[i] ~= 1 or usedTiles[i] == true then
                             goodRow = false
                             break
@@ -106,26 +122,28 @@ function create_tilemap(tilemapObj)
                 table.insert(walls, { l = left, r = right, t = top, b = bottom })
                 for x = left, right do
                     for y = top, bottom do
-                        local i = self:xyToIndex(x, y)
+                        local i = self:xy_to_index(x, y)
                         usedTiles[i] = true
                     end
                 end
+            elseif v == TILE_TYPES.cSpawn then
+                self.spawn_point = current
             end
         end
 
         for i, w in ipairs(walls) do
             print(tostring(w.l).." "..tostring(w.r).." "..tostring(w.t).." "..tostring(w.b))
-            local tl = self:tileToWorldSpace(Vec2(w.l, w.t), "topleft")
-            local br = self:tileToWorldSpace(Vec2(w.r, w.b), "bottomright")
+            local tl = self:tile_to_world_space(Vec2(w.l, w.t), "topleft")
+            local br = self:tile_to_world_space(Vec2(w.r, w.b), "bottomright")
             self.wall_manager:add(tl.x, br.x, tl.y, br.y)
         end
     end
 
     self.render = function(self)
         for i, v in ipairs(self.tiles) do
-            if v == 1 then
-                local tcoord = self:indexToXy(i)
-                local wcoord = self:tileToWorldSpace(tcoord, "topleft")
+            if v == TILE_TYPES.cWall then
+                local tcoord = self:index_to_xy(i)
+                local wcoord = self:tile_to_world_space(tcoord, "topleft")
                 love.graphics.draw(self.tile_image, wcoord.x, wcoord.y)
             end
         end
@@ -134,14 +152,14 @@ function create_tilemap(tilemapObj)
     self.render_grid = function(self)
         love.graphics.setColor(255, 255, 0)
         for x = 0, self.width do
-            local t = self:tileToWorldSpace(Vec2(x, 0), "topleft")
-            local b = self:tileToWorldSpace(Vec2(x, self.height - 1), "bottomleft")
+            local t = self:tile_to_world_space(Vec2(x, 0), "topleft")
+            local b = self:tile_to_world_space(Vec2(x, self.height - 1), "bottomleft")
             love.graphics.line(t.x, t.y, b.x, b.y)
         end
 
         for y = 0, self.height do
-            local l = self:tileToWorldSpace(Vec2(0, y), "topleft")
-            local r = self:tileToWorldSpace(Vec2(self.width - 1, y), "topright")
+            local l = self:tile_to_world_space(Vec2(0, y), "topleft")
+            local r = self:tile_to_world_space(Vec2(self.width - 1, y), "topright")
             love.graphics.line(l.x, l.y, r.x, r.y)
         end
     end
