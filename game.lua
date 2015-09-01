@@ -4,6 +4,7 @@ require 'player'
 require 'npc'
 require 'collision'
 require 'tilemap'
+require 'bullet'
 
 function create_game()
     local self = {}
@@ -23,6 +24,8 @@ function create_game()
         local spawn_pos = self.tilemap:get_spawn_position()
         self.player:set_position(spawn_pos)
 
+        self.bullet_manager = create_bullet_manager(100)
+
         for i = 1, 10 do
             -- self.npc_manager:add(math.random(-300, 300), math.random(-150, 150))
         end
@@ -31,15 +34,17 @@ function create_game()
     self.update = function(self, dt)
         self.collision:update(dt)
         self.player:update(dt)
+        self.bullet_manager:update(dt)
         self.npc_manager:update(dt)
     end
 
     self.render = function(self)
         self.player:render()
+        self.bullet_manager:render()
         self.npc_manager:render()
         self.tilemap:render()
 
-        -- self.collision:debug_render(false)
+        -- self.collision:debug_render(false)`
     end
 
     return self

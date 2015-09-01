@@ -140,6 +140,7 @@ function create_tilemap(tilemapObj)
     end
 
     self.render = function(self)
+        love.graphics.setColor(255, 255, 255)
         for i, v in ipairs(self.tiles) do
             if v == TILE_TYPES.cWall then
                 local tcoord = self:index_to_xy(i)

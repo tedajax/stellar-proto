@@ -60,6 +60,9 @@ function love.draw()
     Game:render()
     Camera:pop()
     Log:render()
+
+    love.graphics.setColor(0, 255, 0)
+    love.graphics.print(love.timer.getFPS(), 5, 5)
 end
 
 function love.keypressed(key)
@@ -67,6 +70,8 @@ function love.keypressed(key)
         love.event.quit()
     elseif key == "m" then
         Game.player.controller.movement:setProperties(json.load("movement.json"))
+    elseif key == "b" then
+        Game.bullet_manager:add(0, 0, 8, 0, 1000)
     end
 
     Input:on_key_down(key)

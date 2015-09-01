@@ -1,3 +1,28 @@
+COLLISION_TAGS = {
+    cDefault = 0,
+    cPlayer = 1,
+    cEnemy = 2,
+    cPlayerBullet = 3,
+    cEnvironment = 4,
+}
+
+COLLISION_FILTERS = {}
+
+function register_collision_filter(tag, category, mask, group)
+    COLLISION_FILTERS[tag] = { category = category, mask = mask, group = group }
+end
+
+register_collision_filter(COLLISION_TAGS.cDefault,          0x0000, 0x0000,  0)
+register_collision_filter(COLLISION_TAGS.cPlayer,           0x0004, 0x0008,  0)
+register_collision_filter(COLLISION_TAGS.cEnemy,            0x0002, 0x0001,  0)
+register_collision_filter(COLLISION_TAGS.cPlayerBullet,     0x0001, 0x0002, -1)
+register_collision_filter(COLLISION_TAGS.cEnvironment,      0xffff, 0xffff,  0)
+
+function get_collision_filter(tag)
+    local f = COLLISION_FILTERS[COLLISION_TAGS[tag]]
+    return f.category, f.mask, f.group
+end
+
 function fixture_call(fixture, func, other, coll)
     local obj = fixture:getUserData()
     if type(obj) == "table" then

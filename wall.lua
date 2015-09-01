@@ -33,11 +33,11 @@ function create_wall()
             self.width, self.height
         )
         self.fixture = love.physics.newFixture(self.body, self.shape)
+        self.fixture:setFilterData(get_collision_filter("cEnvironment"))
     end
 
     self.release = function(self)
         self.body:setActive(false)
-        if self.shape ~= nil then self.shape:destroy() end
         if self.fixture ~= nil then self.fixture:destroy() end
     end
 
