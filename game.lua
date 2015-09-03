@@ -25,6 +25,7 @@ function create_game()
         self.player:set_position(spawn_pos)
 
         self.bullet_manager = create_bullet_manager(100)
+        controller.bullet_manager = self.bullet_manager
 
         for i = 1, 10 do
             -- self.npc_manager:add(math.random(-300, 300), math.random(-150, 150))
@@ -44,7 +45,7 @@ function create_game()
         self.npc_manager:render()
         self.tilemap:render()
 
-        -- self.collision:debug_render(false)`
+        self.collision:debug_render(false)
     end
 
     return self

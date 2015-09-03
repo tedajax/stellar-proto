@@ -2,14 +2,17 @@
     "ground": {
         "acceleration": 1000,
         "max_speed": 600,
-        "friction": 0.5
+        "friction": 0.5,
+        "move_delay": 0
     },
     "air": {
         "acceleration": 1000,
         "max_speed": 600,
-        "friction": 0.01
+        "friction": 0.01,
+        "move_delay": 0
     },
     "max_jumps": 2,
     "jump_force": 80,
-    "jump_hold_force": 200
+    "jump_hold_force": 200,
+    "wall_slide_force": 300
 }

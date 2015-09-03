@@ -1,6 +1,12 @@
 Vec2 = require 'vec2'
 require 'log'
 
+WALL_CONTACTS = {
+    cNone = 0,
+    cLeft = 1,
+    cRight = 2,
+}
+
 function create_movement(body, feet, propertiesObj)
     local self = {}
 
@@ -33,6 +39,9 @@ function create_movement(body, feet, propertiesObj)
     self.is_on_ground = false
     self.is_jumping = false
     self.used_jumps = 0
+    self.against_wall = WALL_CONTACTS.cNone
+
+    self.moving_time = 0
 
     -- TODO: more robust input
     self.input = { x = 0, y = 0, jump = false }
@@ -47,12 +56,16 @@ function create_movement(body, feet, propertiesObj)
         self.jump_requested = true
     end
 
+    self.raycast_relative = function(self, to, offset)
+        offset = offset or Vec2(0, 0)
+        local body_pos = (Vec2(self.body:getPosition()))
+        local s = offset + body_pos
+        local e = s + to
+        return Collision:ray_cast(s, e)
+    end
+
     self.check_on_ground = function(self)
-        local bx, by = self.body:getPosition()
-        local body_pos = Vec2(self.body:getPosition())
-        local s = Vec2(feet:getPoint()) + body_pos
-        local e = s + Vec2(0, feet:getRadius() + 10)
-        local hits = Collision:ray_cast(s, e)
+        local hits = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()))
         local prev_on_ground = self.is_on_ground
         self.is_on_ground = #hits > 0
 
@@ -65,6 +78,26 @@ function create_movement(body, feet, propertiesObj)
         end
 
         return self.is_on_ground
+    end
+
+    self.check_wall_contacts = function(self)
+        -- todo these numbers should be data driven
+        local right_hits = self:raycast_relative(Vec2(16, 0))
+        local left_hits = self:raycast_relative(Vec2(-16, 0))
+
+        local on_right = #right_hits > 0
+        local on_left = #left_hits > 0
+
+        -- favors being against the right wall
+        -- if being against both walls at once is a desired thing then this
+        -- should be changed to be bitfields
+        if on_right == false and on_left == false then
+            self.against_wall = WALL_CONTACTS.cNone
+        elseif on_right == true then
+            self.against_wall = WALL_CONTACTS.cRight
+        else
+            self.against_wall = WALL_CONTACTS.cLeft
+        end
     end
 
     self.get_value = function(self, name)
@@ -85,6 +118,7 @@ function create_movement(body, feet, propertiesObj)
 
     self.update = function(self, dt)
         self:check_on_ground()
+        self:check_wall_contacts()
 
         if self.used_jumps < self.properties.max_jumps and self.jump_requested then
             self.is_jumping = true
@@ -105,15 +139,40 @@ function create_movement(body, feet, propertiesObj)
             end
         end
 
+        if self.input.x == 0 then
+            self.movement_time = 0
+        else
+            self.movement_time = self.movement_time + dt
+        end
+
         local acceleration = self:get_value("acceleration")
         local friction = self:get_value("friction")
         local max_speed = self:get_value("max_speed")
 
-        local velocity = Vec2(self.input.x, self.input.y)
+        local move_delay = self:get_value("move_delay")
+
+        local move_x = 0
+
+        if self.movement_time >= move_delay then
+            move_x = self.input.x
+        end
+
+        local velocity = Vec2(move_x, self.input.y)
 
         velocity = velocity * acceleration * dt
 
         self.body:applyLinearImpulse(velocity.x, 0)
+
+        if self.is_on_ground == false then
+            local _, vy = self.body:getLinearVelocity()
+            if vy > 0 then
+                if move_x > 0 and self.against_wall == WALL_CONTACTS.cRight then
+                    self.body:applyForce(0, -self.properties.wall_slide_force)
+                elseif move_x < 0 and self.against_wall == WALL_CONTACTS.cLeft then
+                    self.body:applyForce(0, -self.properties.wall_slide_force)
+                end
+            end
+        end
 
         local lvx, lvy = self.body:getLinearVelocity()
 

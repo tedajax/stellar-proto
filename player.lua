@@ -1,6 +1,7 @@
 local Vec2 = require 'vec2'
 local json = require 'json'
 require 'movement'
+require 'bullet'
 
 function create_player()
     local self = {}
@@ -76,6 +77,11 @@ function create_player_controller(player)
 
     self.movement = nil
 
+    self.FACING_DIRECTIONS = { cLeft = 0, cRight = 1 }
+    self.facing = self.FACING_DIRECTIONS.cRight
+
+    self.bullet_manager = nil
+
     self.initialize = function(self)
         local movementProps = json.load("movement.json")
         self.movement = create_movement(
@@ -92,8 +98,18 @@ function create_player_controller(player)
             Input:get_button("jump")
         )
 
+        if Input:get_axis("horizontal") > 0 then
+            self.facing = self.FACING_DIRECTIONS.cRight
+        elseif Input:get_axis("horizontal") < 0 then
+            self.facing = self.FACING_DIRECTIONS.cLeft
+        end
+
         if Input:get_button_down("jump") then
             self.movement:request_jump()
+        end
+
+        if Input:get_button_down("fire") and self.bullet_manager ~= nil then
+            self:fire()
         end
 
         self.movement:update(dt)
@@ -105,6 +121,18 @@ function create_player_controller(player)
         --     npc.velocity.x = h
         --     npc.velocity.y = v
         -- end
+    end
+
+    self.fire = function(self)
+        local bx = self.player.position.x
+        local by = self.player.position.y
+        local radius = 8
+        local angle = 0
+        if self.facing == self.FACING_DIRECTIONS.cLeft then
+            angle = 180
+        end
+        local speed = 750
+        self.bullet_manager:add(bx, by, radius, angle, speed, BULLET_TAGS.cPlayer)
     end
 
     self.set_position = function(self, pos)
