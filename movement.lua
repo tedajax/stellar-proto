@@ -1,5 +1,6 @@
 Vec2 = require 'vec2'
 require 'log'
+require 'util'
 
 WALL_CONTACTS = {
     cNone = 0,
@@ -40,11 +41,14 @@ function create_movement(body, feet, propertiesObj)
     self.is_jumping = false
     self.used_jumps = 0
     self.against_wall = WALL_CONTACTS.cNone
+    self.is_wall_sliding = false
+    self.is_stuck_to_wall = false
 
-    self.moving_time = 0
+    self.movement_time = 0
 
     -- TODO: more robust input
     self.input = { x = 0, y = 0, jump = false }
+    self.prev_input = { x = 0, y = 0, jump = false }
 
     self.set_input = function(self, x, y, jump)
         self.input.x = x
@@ -116,6 +120,10 @@ function create_movement(body, feet, propertiesObj)
         self.used_jumps = 0
     end
 
+    self.on_wall_stick = function(self)
+        self.movement_time = 0
+    end
+
     self.update = function(self, dt)
         self:check_on_ground()
         self:check_wall_contacts()
@@ -131,7 +139,7 @@ function create_movement(body, feet, propertiesObj)
         if self.is_jumping then
             if self.input.jump then
                 local _, vy = self.body:getLinearVelocity()
-                if vy > 0 then
+                if vy > 0 and not self.is_wall_sliding then
                     self.body:applyForce(0, -self.properties.jump_hold_force)
                 end
             else
@@ -139,7 +147,7 @@ function create_movement(body, feet, propertiesObj)
             end
         end
 
-        if self.input.x == 0 then
+        if math.sign(self.input.x) ~= math.sign(self.prev_input.x) then
             self.movement_time = 0
         else
             self.movement_time = self.movement_time + dt
@@ -150,6 +158,9 @@ function create_movement(body, feet, propertiesObj)
         local max_speed = self:get_value("max_speed")
 
         local move_delay = self:get_value("move_delay")
+        if self.is_stuck_to_wall then
+            move_delay = self.properties.wall_stick_delay
+        end
 
         local move_x = 0
 
@@ -165,13 +176,34 @@ function create_movement(body, feet, propertiesObj)
 
         if self.is_on_ground == false then
             local _, vy = self.body:getLinearVelocity()
-            if vy > 0 then
-                if move_x > 0 and self.against_wall == WALL_CONTACTS.cRight then
+            local prev_wall_stick = self.is_stuck_to_wall
+            if move_x > 0 and self.against_wall == WALL_CONTACTS.cRight then
+                if vy > 0 then
                     self.body:applyForce(0, -self.properties.wall_slide_force)
-                elseif move_x < 0 and self.against_wall == WALL_CONTACTS.cLeft then
-                    self.body:applyForce(0, -self.properties.wall_slide_force)
+                    self.is_wall_sliding = true
+                else
+                    self.is_wall_sliding = false
                 end
+                self.is_stuck_to_wall = true
+            elseif move_x < 0 and self.against_wall == WALL_CONTACTS.cLeft then
+                if vy > 0 then
+                    self.body:applyForce(0, -self.properties.wall_slide_force)
+                    self.is_wall_sliding = true
+                else
+                    self.is_wall_sliding = false
+                end
+                self.is_stuck_to_wall = true
+            else
+                self.is_wall_sliding = false
+                self.is_stuck_to_wall = false
             end
+
+            if self.is_stuck_to_wall and not prev_wall_stick then
+                self:on_wall_stick()
+            end
+        else
+            self.is_stuck_to_wall = false
+            self.is_wall_sliding = false
         end
 
         local lvx, lvy = self.body:getLinearVelocity()
@@ -186,6 +218,12 @@ function create_movement(body, feet, propertiesObj)
         )
 
         self.jump_requested = false
+
+        Log:debug("Wall stick: "..tostring(self.is_stuck_to_wall))
+
+        for k, v in pairs(self.input) do
+            self.prev_input[k] = v
+        end
     end
 
     self.setProperties = function(self, propertiesObj)

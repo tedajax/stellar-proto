@@ -15,3 +15,13 @@ function originNameValues(origin)
     local o = ORIGIN_NAMES[origin] or { 0.5, 0.5 }
     return o[1], o[2]
 end
+
+function math.sign(v)
+    if v < 0 then
+        return -1
+    elseif v > 0 then
+        return 1
+    else
+        return 0
+    end
+end

@@ -14,5 +14,6 @@
     "max_jumps": 2,
     "jump_force": 80,
     "jump_hold_force": 200,
-    "wall_slide_force": 300
+    "wall_slide_force": 300,
+    "wall_stick_delay": 0.5
 }
