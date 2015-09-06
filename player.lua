@@ -2,6 +2,7 @@ local Vec2 = require 'vec2'
 local json = require 'json'
 require 'movement'
 require 'bullet'
+require 'controller'
 
 function create_player()
     local self = {}
@@ -70,10 +71,7 @@ function create_player()
 end
 
 function create_player_controller(player)
-    local self = {}
-
-    self.player = player
-    self.player.controller = self
+    local self = create_controller(player)
 
     self.movement = nil
 
@@ -85,13 +83,13 @@ function create_player_controller(player)
     self.initialize = function(self)
         local movementProps = json.load("movement.json")
         self.movement = create_movement(
-            self.player.body,
-            self.player.foot_shape,
+            self.actor.body,
+            self.actor.foot_shape,
             movementProps
         )
     end
 
-    self.update = function(self, dt)
+    self.on_update = function(self, dt)
         self.movement:set_input(
             Input:get_axis("horizontal"),
             Input:get_axis("vertical"),
@@ -114,8 +112,8 @@ function create_player_controller(player)
 
         self.movement:update(dt)
 
-        self.player.position.x = self.player.body:getX()
-        self.player.position.y = self.player.body:getY()
+        self.actor.position.x = self.actor.body:getX()
+        self.actor.position.y = self.actor.body:getY()
 
         -- for _, npc in ipairs(self.selected) do
         --     npc.velocity.x = h
@@ -124,8 +122,8 @@ function create_player_controller(player)
     end
 
     self.fire = function(self)
-        local bx = self.player.position.x
-        local by = self.player.position.y
+        local bx = self.actor.position.x
+        local by = self.actor.position.y
         local radius = 8
         local angle = 0
         if self.facing == self.FACING_DIRECTIONS.cLeft then
@@ -136,7 +134,7 @@ function create_player_controller(player)
     end
 
     self.set_position = function(self, pos)
-        self.player:setPosition(pos)
+        self.actor:setPosition(pos)
     end
 
     return self

@@ -5,6 +5,7 @@ require 'npc'
 require 'collision'
 require 'tilemap'
 require 'bullet'
+require 'environment'
 
 function create_game()
     local self = {}
@@ -17,9 +18,13 @@ function create_game()
         controller:initialize()
         self.npc_manager = create_npc_manager(100)
 
+        self.environment_manager = create_environment_manager(200)
+
         local tmapobj = json.load("test.json")
         self.tilemap = create_tilemap(tmapobj)
-        self.tilemap:recalculate()
+        self.tilemap:recalculate(self.environment_manager)
+
+        self.environment_manager:add_platform(0, -150, 100, 24, create_platform_controller_simple())
 
         local spawn_pos = self.tilemap:get_spawn_position()
         self.player:set_position(spawn_pos)
@@ -37,6 +42,7 @@ function create_game()
         self.player:update(dt)
         self.bullet_manager:update(dt)
         self.npc_manager:update(dt)
+        self.environment_manager:update(dt)
     end
 
     self.render = function(self)
@@ -44,6 +50,7 @@ function create_game()
         self.bullet_manager:render()
         self.npc_manager:render()
         self.tilemap:render()
+        self.environment_manager:render()
 
         self.collision:debug_render(false)
     end

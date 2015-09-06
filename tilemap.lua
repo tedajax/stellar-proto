@@ -1,4 +1,4 @@
-require 'wall'
+require 'environment'
 require 'util'
 Vec2 = require 'vec2'
 
@@ -29,8 +29,6 @@ function create_tilemap(tilemapObj)
     for i = 1, self.width * self.height do
         table.insert(self.tiles, tilemapObj.data[i])
     end
-
-    self.wall_manager = create_wall_manager(self.width * self.height + 1)
 
     self.world_to_tile_space = function(self, wcoord)
         assert(Vec2.isvec2(wcoord))
@@ -80,8 +78,8 @@ function create_tilemap(tilemapObj)
 
     -- goes through the tile data and recreates walls and everything
     -- expensive, only call after setting tile data!
-    self.recalculate = function(self)
-        self.wall_manager:clear()
+    self.recalculate = function(self, environment_manager)
+        environment_manager:clear_walls()
 
         local usedTiles = {}
         for i, _ in ipairs(self.tiles) do table.insert(usedTiles, false) end
@@ -135,8 +133,9 @@ function create_tilemap(tilemapObj)
             print(tostring(w.l).." "..tostring(w.r).." "..tostring(w.t).." "..tostring(w.b))
             local tl = self:tile_to_world_space(Vec2(w.l, w.t), "topleft")
             local br = self:tile_to_world_space(Vec2(w.r, w.b), "bottomright")
-            self.wall_manager:add(tl.x, br.x, tl.y, br.y)
+            environment_manager:add_wall(tl.x, br.x, tl.y, br.y)
         end
+
     end
 
     self.render = function(self)
