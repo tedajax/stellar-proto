@@ -71,9 +71,10 @@ function create_movement(body, feet, propertiesObj)
     end
 
     self.check_on_ground = function(self)
-        local hits = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()))
+        local hits1 = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()) + Vec2(-5, 0))
+        local hits2 = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()) + Vec2(5, 0))
         local prev_on_ground = self.is_on_ground
-        self.is_on_ground = #hits > 0
+        self.is_on_ground = #hits1 > 0 or #hits2 > 0
 
         if prev_on_ground ~= self.is_on_ground then
             if self.is_on_ground then
@@ -88,11 +89,14 @@ function create_movement(body, feet, propertiesObj)
 
     self.check_wall_contacts = function(self)
         -- todo these numbers should be data driven
-        local right_hits = self:raycast_relative(Vec2(16, 0))
-        local left_hits = self:raycast_relative(Vec2(-16, 0))
+        local right_hits1 = self:raycast_relative(Vec2(16, 0), Vec2(0, -8))
+        local right_hits2 = self:raycast_relative(Vec2(16, 0), Vec2(0, 8))
 
-        local on_right = #right_hits > 0
-        local on_left = #left_hits > 0
+        local left_hits1 = self:raycast_relative(Vec2(-16, 0), Vec2(0, -8))
+        local left_hits2 = self:raycast_relative(Vec2(-16, 0), Vec2(0, 8))
+
+        local on_right = #right_hits1 > 0 or #right_hits2 > 0
+        local on_left = #left_hits1 > 0 or #left_hits2 > 0
 
         -- favors being against the right wall
         -- if being against both walls at once is a desired thing then this
@@ -104,6 +108,7 @@ function create_movement(body, feet, propertiesObj)
         else
             self.against_wall = WALL_CONTACTS.cLeft
         end
+        self.wall_jump_requested_timer = 0
     end
 
     self.get_value = function(self, name)
@@ -197,6 +202,13 @@ function create_movement(body, feet, propertiesObj)
 
         velocity = velocity * acceleration * dt
 
+        local preForceVx = self.body:getLinearVelocity()
+
+        if preForceVx >= max_speed and velocity.x > 0 then
+            velocity.x = 0
+        elseif preForceVx <= -max_speed and velocity.x < 0 then
+            velocity.x = 0
+        end
         self.body:applyLinearImpulse(velocity.x, 0)
 
         if self.input.x > 0 and self.against_wall == WALL_CONTACTS.cRight then
@@ -223,7 +235,7 @@ function create_movement(body, feet, propertiesObj)
                     self.wall_jump_requested_timer = self.wall_jump_requested_timer - dt
                 end
 
-                if self.jump_requested then
+                if self.input.jump then
                     self.wall_jump_requested_timer = self.properties.wall_jump_response_time
                 end
 
@@ -267,8 +279,22 @@ function create_movement(body, feet, propertiesObj)
             lvy = self.properties.wall_slide_max_speed
         end
 
+        if lvx < -max_speed then
+            lvx = lvx + self:get_value("max_speed_slow_rate") * dt
+            if lvx > -max_speed then
+                lvx = -max_speed
+            end
+        end
+
+        if lvx > max_speed then
+            lvx = lvx - self:get_value("max_speed_slow_rate") * dt
+            if lvx < max_speed then
+                lvx = max_speed
+            end
+        end
+
         self.body:setLinearVelocity(
-            math.clamp(lvx, -max_speed, max_speed),
+            lvx,
             lvy
         )
 
