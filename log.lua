@@ -80,7 +80,7 @@ function create_debug_message(index, msg)
 
     self.render = function(self, x, y, spacing)
         love.graphics.setColor(255, 255, 0)
-        love.graphics.print(self.message, x, y, self.index * spacing)
+        love.graphics.print(self.message, x, y + self.index * spacing)
     end
 
     return self

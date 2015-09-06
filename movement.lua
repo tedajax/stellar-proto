@@ -41,8 +41,10 @@ function create_movement(body, feet, propertiesObj)
     self.is_jumping = false
     self.used_jumps = 0
     self.against_wall = WALL_CONTACTS.cNone
-    self.is_wall_sliding = false
+    self.pushing_against_wall = WALL_CONTACTS.cNone
     self.is_stuck_to_wall = false
+    self.wall_stick_timer = 0
+    self.wall_jump_requested_timer = 0
 
     self.movement_time = 0
 
@@ -121,25 +123,48 @@ function create_movement(body, feet, propertiesObj)
     end
 
     self.on_wall_stick = function(self)
-        self.movement_time = 0
+        self.is_stuck_to_wall = true
+        self.wall_stick_timer = self.properties.wall_stick_delay
+    end
+
+    self.on_wall_unstick = function(self)
+        self.is_stuck_to_wall = false
+        self.wall_stick_timer = 0
+        self.body:setGravityScale(1.0)
+        self.wall_jump_requested_timer = 0
+    end
+
+    self.jump = function(self)
+        self.is_jumping = true
+        local vx, vy = self.body:getLinearVelocity()
+        self.body:setLinearVelocity(vx, 0)
+        self.body:applyLinearImpulse(0, -self.properties.jump_force)
+        self.used_jumps = self.used_jumps + 1
+    end
+
+    self.wall_jump = function(self, scalar)
+        self:on_wall_unstick()
+        self.wall_jump_requested_timer = 0
+        self.is_jumping = true
+        self.used_jumps = 1
+        local _, vy = self.body:getLinearVelocity()
+        if vy > 0 then vy = 0 end
+        self.body:setLinearVelocity(0, vy)
+        self.body:applyLinearImpulse(scalar * self.properties.wall_jump_force.x, -self.properties.wall_jump_force.y)
     end
 
     self.update = function(self, dt)
         self:check_on_ground()
         self:check_wall_contacts()
 
-        if self.used_jumps < self.properties.max_jumps and self.jump_requested then
-            self.is_jumping = true
-            local vx, vy = self.body:getLinearVelocity()
-            self.body:setLinearVelocity(vx, 0)
-            self.body:applyLinearImpulse(0, -self.properties.jump_force)
-            self.used_jumps = self.used_jumps + 1
+        if self.used_jumps < self.properties.max_jumps and self.jump_requested and not self.is_stuck_to_wall then
+            self:jump()
         end
 
         if self.is_jumping then
             if self.input.jump then
                 local _, vy = self.body:getLinearVelocity()
-                if vy > 0 and not self.is_wall_sliding then
+                if vy > 0 and not self.is_stuck_to_wall then
                     self.body:applyForce(0, -self.properties.jump_hold_force)
                 end
             else
@@ -174,42 +199,72 @@ function create_movement(body, feet, propertiesObj)
 
         self.body:applyLinearImpulse(velocity.x, 0)
 
+        if self.input.x > 0 and self.against_wall == WALL_CONTACTS.cRight then
+            self.pushing_against_wall = WALL_CONTACTS.cRight
+        elseif self.input.x < 0 and self.against_wall == WALL_CONTACTS.cLeft then
+            self.pushing_against_wall = WALL_CONTACTS.cLeft
+        else
+            self.pushing_against_wall = WALL_CONTACTS.cNone
+        end
+
         if self.is_on_ground == false then
             local _, vy = self.body:getLinearVelocity()
-            local prev_wall_stick = self.is_stuck_to_wall
-            if move_x > 0 and self.against_wall == WALL_CONTACTS.cRight then
-                if vy > 0 then
-                    self.body:applyForce(0, -self.properties.wall_slide_force)
-                    self.is_wall_sliding = true
-                else
-                    self.is_wall_sliding = false
-                end
-                self.is_stuck_to_wall = true
-            elseif move_x < 0 and self.against_wall == WALL_CONTACTS.cLeft then
-                if vy > 0 then
-                    self.body:applyForce(0, -self.properties.wall_slide_force)
-                    self.is_wall_sliding = true
-                else
-                    self.is_wall_sliding = false
-                end
-                self.is_stuck_to_wall = true
-            else
-                self.is_wall_sliding = false
-                self.is_stuck_to_wall = false
-            end
 
-            if self.is_stuck_to_wall and not prev_wall_stick then
-                self:on_wall_stick()
+            if self.is_stuck_to_wall then
+                if self.against_wall == WALL_CONTACTS.cNone then
+                    self:on_wall_unstick()
+                end
+
+                if vy > 0 then
+                    self.body:setGravityScale(self.properties.wall_gravity_modifier)
+                end
+
+                if self.wall_jump_requested_timer > 0 then
+                    self.wall_jump_requested_timer = self.wall_jump_requested_timer - dt
+                end
+
+                if self.jump_requested then
+                    self.wall_jump_requested_timer = self.properties.wall_jump_response_time
+                end
+
+                if self.wall_stick_timer > 0 then
+                    if self.pushing_against_wall == WALL_CONTACTS.cNone then
+                        self.wall_stick_timer = self.wall_stick_timer - dt
+
+                        if self.wall_stick_timer <= 0 then
+                            self:on_wall_unstick()
+                        end
+                    end
+
+                    if self.wall_jump_requested_timer > 0 then
+                        if self.against_wall == WALL_CONTACTS.cRight and self.input.x < 0 then
+                            self:wall_jump(-1)
+                        elseif self.against_wall == WALL_CONTACTS.cLeft and self.input.x > 0 then
+                            self:wall_jump(1)
+                        end
+                    end
+                end
+            else
+                self.body:setGravityScale(1.0)
+
+                if self.pushing_against_wall ~= WALL_CONTACTS.cNone then
+                   self:on_wall_stick()
+                end
             end
         else
-            self.is_stuck_to_wall = false
-            self.is_wall_sliding = false
+            if self.is_stuck_to_wall then
+                self:on_wall_unstick()
+            end
         end
 
         local lvx, lvy = self.body:getLinearVelocity()
 
         if self.input.x == 0 then
             lvx = lvx * (1 - friction)
+        end
+
+        if self.is_stuck_to_wall and lvy > self.properties.wall_slide_max_speed then
+            lvy = self.properties.wall_slide_max_speed
         end
 
         self.body:setLinearVelocity(
@@ -220,6 +275,11 @@ function create_movement(body, feet, propertiesObj)
         self.jump_requested = false
 
         Log:debug("Wall stick: "..tostring(self.is_stuck_to_wall))
+        Log:debug("Is on ground: "..tostring(self.is_on_ground))
+        Log:debug("Wall stick timer: "..tostring(self.wall_stick_timer))
+        Log:debug("Against wall: "..tostring(self.against_wall))
+        Log:debug("Pushging against: "..tostring(self.pushing_against_wall))
+        Log:debug("Input X: "..tostring(self.input.x))
 
         for k, v in pairs(self.input) do
             self.prev_input[k] = v

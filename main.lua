@@ -68,10 +68,8 @@ end
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
-    elseif key == "m" then
-        Game.player.controller.movement:setProperties(json.load("movement.json"))
-    elseif key == "b" then
-        Game.bullet_manager:add(0, 0, 8, 0, 1000)
+    elseif key == "`" then
+        debug.debug()
     end
 
     Input:on_key_down(key)
