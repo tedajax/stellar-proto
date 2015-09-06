@@ -159,13 +159,16 @@ function create_movement(body, feet, propertiesObj)
     end
 
     self.update = function(self, dt)
+        -- casts ray casts and update state determining ground/wall states
         self:check_on_ground()
         self:check_wall_contacts()
 
+        -- if conditions for jump are met then jump
         if self.used_jumps < self.properties.max_jumps and self.jump_requested and not self.is_stuck_to_wall then
             self:jump()
         end
 
+        -- allow for holding the jump button to float a bit more
         if self.is_jumping then
             if self.input.jump then
                 local _, vy = self.body:getLinearVelocity()
@@ -177,33 +180,32 @@ function create_movement(body, feet, propertiesObj)
             end
         end
 
+        -- handles waiting before moving to accomdate turning around without moving with light taps of keys
         if math.sign(self.input.x) ~= math.sign(self.prev_input.x) then
             self.movement_time = 0
         else
             self.movement_time = self.movement_time + dt
         end
 
+        -- extract values from properties object depending on current state
         local acceleration = self:get_value("acceleration")
         local friction = self:get_value("friction")
         local max_speed = self:get_value("max_speed")
-
         local move_delay = self:get_value("move_delay")
-        if self.is_stuck_to_wall then
-            move_delay = self.properties.wall_stick_delay
-        end
 
+        -- this is used in conjuction with the movement_time stuff to delay movement when facing a new direction
         local move_x = 0
-
         if self.movement_time >= move_delay then
             move_x = self.input.x
         end
-
         local velocity = Vec2(move_x, self.input.y)
 
         velocity = velocity * acceleration * dt
 
+        -- extract the velocity before we apply force
         local preForceVx = self.body:getLinearVelocity()
 
+        -- clamp our velocity from input if the velocity is already at max speeds
         if preForceVx >= max_speed and velocity.x > 0 then
             velocity.x = 0
         elseif preForceVx <= -max_speed and velocity.x < 0 then
@@ -211,6 +213,7 @@ function create_movement(body, feet, propertiesObj)
         end
         self.body:applyLinearImpulse(velocity.x, 0)
 
+        -- Determine if the player is pushing against a wall
         if self.input.x > 0 and self.against_wall == WALL_CONTACTS.cRight then
             self.pushing_against_wall = WALL_CONTACTS.cRight
         elseif self.input.x < 0 and self.against_wall == WALL_CONTACTS.cLeft then
@@ -223,22 +226,30 @@ function create_movement(body, feet, propertiesObj)
             local _, vy = self.body:getLinearVelocity()
 
             if self.is_stuck_to_wall then
+                -- if at any time the player is no longer pushing into the wall we unstick
                 if self.against_wall == WALL_CONTACTS.cNone then
                     self:on_wall_unstick()
                 end
 
+                -- reduce gravity scale when wall sliding
                 if vy > 0 then
                     self.body:setGravityScale(self.properties.wall_gravity_modifier)
                 end
 
+                -- tick the wall jump request timer
                 if self.wall_jump_requested_timer > 0 then
                     self.wall_jump_requested_timer = self.wall_jump_requested_timer - dt
                 end
 
+                -- jump will cause a timer to countdown and if in that time a movement order is given away from the wall
+                -- then a wall jump with occur.  This accomodates accidentally pressing jump before a direction.
+                -- feels less clunky when the controller forgives little mistakes like that.
                 if self.input.jump then
                     self.wall_jump_requested_timer = self.properties.wall_jump_response_time
                 end
 
+                -- the wall stick timer allows for not pushing against the wall for a time so that wall jump commands
+                -- can be executed.
                 if self.wall_stick_timer > 0 then
                     if self.pushing_against_wall == WALL_CONTACTS.cNone then
                         self.wall_stick_timer = self.wall_stick_timer - dt
@@ -258,7 +269,7 @@ function create_movement(body, feet, propertiesObj)
                 end
             else
                 self.body:setGravityScale(1.0)
-
+                -- when the player is not on the ground and pushing against a wall we go into wall stick mode
                 if self.pushing_against_wall ~= WALL_CONTACTS.cNone then
                    self:on_wall_stick()
                 end
@@ -279,6 +290,7 @@ function create_movement(body, feet, propertiesObj)
             lvy = self.properties.wall_slide_max_speed
         end
 
+        -- if travelling above max_speed slow down speed over time
         if lvx < -max_speed then
             lvx = lvx + self:get_value("max_speed_slow_rate") * dt
             if lvx > -max_speed then

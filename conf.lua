@@ -1,5 +1,5 @@
 function love.conf(t)
-    t.identity = "overmind"
+    t.identity = "Stellar"
     t.version = "0.9.2"
 
     t.console = true
@@ -7,6 +7,7 @@ function love.conf(t)
     t.window.width = 1280
     t.window.height = 720
     t.window.display = 1
+    t.window.title = "Stellar"
 
     t.window.vsync = false
 end
