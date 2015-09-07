@@ -227,7 +227,6 @@ function create_movement(body, feet, propertiesObj)
 
         -- extract values from properties object depending on current state
         local acceleration = self:get_value("acceleration")
-        local friction = self:get_value("friction")
         local max_speed = self:get_value("max_speed")
 
         -- this is used in conjuction with the movement_time stuff to delay movement when facing a new direction
@@ -320,8 +319,17 @@ function create_movement(body, feet, propertiesObj)
 
         local lvx, lvy = self.body:getLinearVelocity()
 
+        local stop_acceleration = self:get_value("stop_acceleration")
+
         if self.input.x == 0 then
-            lvx = lvx * (1 - friction)
+            if lvx < 0 then
+                lvx = lvx + stop_acceleration * dt
+                if lvx > 0 then lvx = 0 end
+            elseif lvx > 0 then
+                lvx = lvx - stop_acceleration * dt
+                if lvx < 0 then lvx = 0 end
+            end
+            -- lvx = lvx * (1 - friction)
         end
 
 

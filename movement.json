@@ -1,17 +1,17 @@
 {
     "ground": {
         "acceleration": 5000,
-        "max_speed": 800,
+        "max_speed": 600,
         "max_speed_slow_rate": 50,
-        "friction": 0.5,
-        "move_delay": 0
+        "move_delay": 0,
+        "stop_acceleration": 2000
     },
     "air": {
-        "acceleration": 20000,
-        "max_speed": 800,
+        "acceleration": 5000,
+        "max_speed": 600,
         "max_speed_slow_rate": 50,
-        "friction": 0.01,
-        "move_delay": 0
+        "move_delay": 0,
+        "stop_acceleration": 500
     },
     "max_jumps": 1,
     "jump_force": 1400,
