@@ -4,6 +4,7 @@ COLLISION_TAGS = {
     cEnemy = 2,
     cPlayerBullet = 3,
     cEnvironment = 4,
+    cStaticEnvironment = 5,
 }
 
 COLLISION_FILTERS = {}
@@ -12,15 +13,28 @@ function register_collision_filter(tag, category, mask, group)
     COLLISION_FILTERS[tag] = { category = category, mask = mask, group = group }
 end
 
-register_collision_filter(COLLISION_TAGS.cDefault,          0x0000, 0x0000,  0)
-register_collision_filter(COLLISION_TAGS.cPlayer,           0x0004, 0x0008,  0)
-register_collision_filter(COLLISION_TAGS.cEnemy,            0x0002, 0x0001,  0)
-register_collision_filter(COLLISION_TAGS.cPlayerBullet,     0x0001, 0x0002, -1)
-register_collision_filter(COLLISION_TAGS.cEnvironment,      0xffff, 0xffff,  0)
+register_collision_filter(COLLISION_TAGS.cDefault,              0x0000, 0x0000,  0)
+register_collision_filter(COLLISION_TAGS.cPlayer,               0x0001, 0x0018,  0)
+register_collision_filter(COLLISION_TAGS.cEnemy,                0x0002, 0x001D,  0)
+register_collision_filter(COLLISION_TAGS.cPlayerBullet,         0x0004, 0x0016, -1)
+register_collision_filter(COLLISION_TAGS.cEnvironment,          0x0008, 0xffff,  0)
+register_collision_filter(COLLISION_TAGS.cStaticEnvironment,    0x0010, 0xffff,  0)
 
 function get_collision_filter(tag)
     local f = COLLISION_FILTERS[COLLISION_TAGS[tag]]
     return f.category, f.mask, f.group
+end
+
+function collision_filter_test(c1, m1, g1, c2, m2, g2)
+    if g1 == g2 and g1 ~= 0 then
+        if g1 > 0 then
+            return true
+        else
+            return false
+        end
+    end
+
+    return bit.band(m1, c2) > 0 and bit.band(m2, c1) > 0
 end
 
 function fixture_call(fixture, func, other, coll)
@@ -67,7 +81,7 @@ function create_collision()
     -- represents raycasts that were called this frame so we can debug them
     self.frame_ray_casts = {}
 
-    self.ray_cast = function(self, startpoint, endpoint)
+    self.ray_cast = function(self, startpoint, endpoint, mask)
         local hit_list = {}
 
         self.world:rayCast(
@@ -78,8 +92,19 @@ function create_collision()
                 hit.position = Vec2(x, y)
                 hit.normal = Vec2(xn, yn)
                 hit.distance = fraction
-                table.insert(hit_list, hit)
-                return 1
+                hit.fixture = fixture
+                if mask then
+                    local category = fixture:getFilterData()
+                    if bit.band(mask, category) > 0 then
+                        table.insert(hit_list, hit)
+                        return 0
+                    else
+                        return 1
+                    end
+                else
+                    table.insert(hit_list, hit)
+                    return 1
+                end
             end
         )
 

@@ -24,7 +24,7 @@ function create_game()
         self.tilemap = create_tilemap(tmapobj)
         self.tilemap:recalculate(self.environment_manager)
 
-        self.environment_manager:add_platform(0, -150, 100, 24, create_platform_controller_simple())
+        -- self.environment_manager:add_platform(-400, -50, 100, 24, create_platform_controller_simple())
 
         local spawn_pos = self.tilemap:get_spawn_position()
         self.player:set_position(spawn_pos)

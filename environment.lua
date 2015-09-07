@@ -35,7 +35,7 @@ function create_wall()
             self.width, self.height
         )
         self.fixture = love.physics.newFixture(self.body, self.shape)
-        self.fixture:setFilterData(get_collision_filter("cEnvironment"))
+        self.fixture:setFilterData(get_collision_filter("cStaticEnvironment"))
     end
 
     self.release = function(self)
@@ -94,6 +94,7 @@ function create_platform()
         )
         self.fixture = love.physics.newFixture(self.body, self.shape)
         self.fixture:setFilterData(get_collision_filter("cEnvironment"))
+        self.fixture:setUserData(self)
 
         if controller ~= nil then
             controller:posess(self)
@@ -138,9 +139,10 @@ function create_platform_controller_simple()
     local self = create_controller()
 
     self.start_x = 0
-    self.distance = 100
-    self.speed = 50
+    self.distance = 300
+    self.speed = 500
     self.direction = 1
+    self.velocity = Vec2(0, 0)
 
     self.on_posess = function(self)
         self.start_x = self.actor.position.x
@@ -149,13 +151,15 @@ function create_platform_controller_simple()
     self.on_update = function(self, dt)
         local x = self.actor.position.x
         if self.direction > 0 then
-            x = x + self.speed * dt
+            self.velocity.x = self.speed * dt
+            x = x + self.velocity.x
             if x >= self.start_x + self.distance then
                 x = self.start_x + self.distance
                 self.direction = -1
             end
         elseif self.direction < 0 then
-            x = x - self.speed * dt
+            self.velocity.x = -self.speed * dt
+            x = x + self.velocity.x
             if x <= self.start_x then
                 x = self.start_x
                 self.direction = 1

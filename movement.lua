@@ -38,6 +38,7 @@ function create_movement(body, feet, propertiesObj)
     self.jump_requested = false
 
     self.is_on_ground = false
+    self.on_moving_platform = nil
     self.is_jumping = false
     self.used_jumps = 0
     self.against_wall = WALL_CONTACTS.cNone
@@ -62,19 +63,47 @@ function create_movement(body, feet, propertiesObj)
         self.jump_requested = true
     end
 
-    self.raycast_relative = function(self, to, offset)
+    self.raycast_relative = function(self, to, offset, tag)
+        local filter = nil
+        if tag then
+            filter = get_collision_filter(tag)
+        end
+
         offset = offset or Vec2(0, 0)
         local body_pos = (Vec2(self.body:getPosition()))
         local s = offset + body_pos
         local e = s + to
-        return Collision:ray_cast(s, e)
+        return Collision:ray_cast(s, e, filter)
     end
 
     self.check_on_ground = function(self)
-        local hits1 = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()) + Vec2(-5, 0))
-        local hits2 = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()) + Vec2(5, 0))
+        local static_hits1 = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()) + Vec2(-5, 0), "cStaticEnvironment")
+        local static_hits2 = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()) + Vec2(5, 0), "cStaticEnvironment")
+
         local prev_on_ground = self.is_on_ground
-        self.is_on_ground = #hits1 > 0 or #hits2 > 0
+        self.is_on_ground = #static_hits1 > 0 or #static_hits2 > 0
+        self.on_moving_platform = nil
+
+        if not self.is_on_ground then
+            local platform_hits1 = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()) + Vec2(-5, 0), "cEnvironment")
+            local platform_hits2 = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()) + Vec2(5, 0), "cEnvironment")
+
+            if #platform_hits1 > 0 or #platform_hits2 > 0 then
+                local fixture = nil
+                for _, h in ipairs(platform_hits1) do
+                    fixture = h.fixture
+                end
+                if fixture == nil then
+                    for _, h in ipairs(platform_hits2) do
+                        fixture = h.fixture
+                    end
+                end
+                if fixture ~= nil then
+                    self.is_on_ground = true
+                    self.on_moving_platform = fixture:getUserData()
+                end
+            end
+        end
 
         if prev_on_ground ~= self.is_on_ground then
             if self.is_on_ground then
@@ -309,6 +338,16 @@ function create_movement(body, feet, propertiesObj)
             lvx,
             lvy
         )
+
+        if self.on_moving_platform ~= nil then
+            local bx, by = self.body:getX(), self.body:getY()
+            if self.on_moving_platform.controller ~= nil then
+                bx = bx + self.on_moving_platform.controller.velocity.x
+                by = by + self.on_moving_platform.controller.velocity.y
+                self.body:setX(bx)
+                self.body:setY(by)
+            end
+        end
 
         self.jump_requested = false
 
