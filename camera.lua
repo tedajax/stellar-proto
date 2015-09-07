@@ -15,7 +15,7 @@ function create_camera(x, y)
     self.zoom = 0
     self.base_zoom = 1
     self.target = nil
-    self.follow_bounds = { l = -64, r = 64, t = -16, b = -16 }
+    self.follow_bounds = { l = -16, r = 16, t = -16, b = -16 }
 
     self.move = function(self, x, y)
         local x = x or 0
