@@ -14,6 +14,8 @@ function create_camera(x, y)
     self.rotation = 0
     self.zoom = 0
     self.base_zoom = 1
+    self.target = nil
+    self.follow_bounds = { l = -64, r = 64, t = -16, b = -16 }
 
     self.move = function(self, x, y)
         local x = x or 0
@@ -25,6 +27,10 @@ function create_camera(x, y)
     self.look_at = function(self, x, y)
         self.position.x = x - love.graphics.getWidth() / 2
         self.position.y = y - love.graphics.getHeight() / 2
+    end
+
+    self.get_center = function(self)
+        return self.position.x + love.graphics.getWidth() / 2, self.position.y + love.graphics.getHeight() / 2
     end
 
     self.rotate = function(self, angle)
@@ -52,6 +58,13 @@ function create_camera(x, y)
         self.shake_magnitude = mag or 1
     end
 
+    self.set_target = function(self, target)
+        assert(type(target) == "table")
+        assert(type(target.x) == "number")
+        assert(type(target.y) == "number")
+        self.target = target
+    end
+
     self.update = function(self, dt)
         if self.shake_time > 0 then
             self.shake_time = self.shake_time - dt
@@ -66,6 +79,29 @@ function create_camera(x, y)
         else
             self.shake_pos.x = 0
             self.shake_pos.y = 0
+        end
+
+        if self.target ~= nil then
+            local cx, cy = self:get_center()
+            local nx, ny = cx, cy
+
+            if self.target.x > cx + self.follow_bounds.r then
+                nx = self.target.x - self.follow_bounds.r
+            end
+
+            if self.target.x < cx + self.follow_bounds.l then
+                nx = self.target.x - self.follow_bounds.l
+            end
+
+            if self.target.y > cy + self.follow_bounds.b then
+                ny = self.target.y - self.follow_bounds.b
+            end
+
+            if self.target.y < cy + self.follow_bounds.t then
+                ny = self.target.y - self.follow_bounds.t
+            end
+
+            self:look_at(nx, ny)
         end
     end
 

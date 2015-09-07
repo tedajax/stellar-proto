@@ -130,7 +130,6 @@ function create_tilemap(tilemapObj)
         end
 
         for i, w in ipairs(walls) do
-            print(tostring(w.l).." "..tostring(w.r).." "..tostring(w.t).." "..tostring(w.b))
             local tl = self:tile_to_world_space(Vec2(w.l, w.t), "topleft")
             local br = self:tile_to_world_space(Vec2(w.r, w.b), "bottomright")
             environment_manager:add_wall(tl.x, br.x, tl.y, br.y)

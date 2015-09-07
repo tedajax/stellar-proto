@@ -37,6 +37,8 @@ function create_player()
     -- self.fixture:setUserData(self)
     self.foot_fixture:setUserData(self)
 
+    self.body:setMass(1)
+
     self.on_collision_begin = function(self, other, coll)
     end
 
@@ -129,7 +131,7 @@ function create_player_controller(player)
         if self.facing == self.FACING_DIRECTIONS.cLeft then
             angle = 180
         end
-        local speed = 750
+        local speed = 1500
         self.bullet_manager:add(bx, by, radius, angle, speed, BULLET_TAGS.cPlayer)
     end
 

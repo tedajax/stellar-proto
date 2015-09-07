@@ -37,28 +37,28 @@ function love.load()
     Input:add_button("fire")
     Input:create_button_binding("fire", "x")
 
-    Game = create_game()
-    Game:init()
-
     Camera = create_camera()
     Camera.base_zoom = Screen.base_width / Screen.width
     Camera:look_at(0, 0)
-    -- Camera:zoom_in(5)
+
+    Game = create_game()
+    Game:init()
 
     Log = create_log()
 end
 
 function love.update(dt)
     Game:update(dt)
+    Camera:update(dt)
     Input:update(dt)
     Log:update(dt)
-    -- Camera:look_at(Game.player.position.x, Game.player.position.y)
 end
 
 function love.draw()
     Camera:push()
     Game:render()
     Camera:pop()
+
     Log:render()
 
     love.graphics.setColor(0, 255, 0)

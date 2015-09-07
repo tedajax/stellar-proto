@@ -16,6 +16,9 @@ function create_game()
         self.player = create_player()
         local controller = create_player_controller(self.player)
         controller:initialize()
+
+        Camera:set_target(self.player.position)
+
         self.npc_manager = create_npc_manager(100)
 
         self.environment_manager = create_environment_manager(200)

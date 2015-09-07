@@ -78,16 +78,18 @@ function create_movement(body, feet, propertiesObj)
     end
 
     self.check_on_ground = function(self)
-        local static_hits1 = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()) + Vec2(-5, 0), "cStaticEnvironment")
-        local static_hits2 = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()) + Vec2(5, 0), "cStaticEnvironment")
+        local dist = self.properties.raycasts.ground.distance
+        local spread = self.properties.raycasts.ground.spread / 2
+        local static_hits1 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet:getPoint()) + Vec2(-spread, 0), "cStaticEnvironment")
+        local static_hits2 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet:getPoint()) + Vec2(spread, 0), "cStaticEnvironment")
 
         local prev_on_ground = self.is_on_ground
         self.is_on_ground = #static_hits1 > 0 or #static_hits2 > 0
         self.on_moving_platform = nil
 
         if not self.is_on_ground then
-            local platform_hits1 = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()) + Vec2(-5, 0), "cEnvironment")
-            local platform_hits2 = self:raycast_relative(Vec2(0, 10), Vec2(self.feet:getPoint()) + Vec2(5, 0), "cEnvironment")
+            local platform_hits1 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet:getPoint()) + Vec2(-spread, 0), "cEnvironment")
+            local platform_hits2 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet:getPoint()) + Vec2(spread, 0), "cEnvironment")
 
             if #platform_hits1 > 0 or #platform_hits2 > 0 then
                 local fixture = nil
@@ -118,12 +120,14 @@ function create_movement(body, feet, propertiesObj)
     end
 
     self.check_wall_contacts = function(self)
-        -- todo these numbers should be data driven
-        local right_hits1 = self:raycast_relative(Vec2(16, 0), Vec2(0, -8))
-        local right_hits2 = self:raycast_relative(Vec2(16, 0), Vec2(0, 8))
+        local dist = self.properties.raycasts.walls.distance
+        local spread = self.properties.raycasts.walls.spread / 2
 
-        local left_hits1 = self:raycast_relative(Vec2(-16, 0), Vec2(0, -8))
-        local left_hits2 = self:raycast_relative(Vec2(-16, 0), Vec2(0, 8))
+        local right_hits1 = self:raycast_relative(Vec2(dist, 0), Vec2(0, -spread))
+        local right_hits2 = self:raycast_relative(Vec2(dist, 0), Vec2(0, spread))
+
+        local left_hits1 = self:raycast_relative(Vec2(-dist, 0), Vec2(0, -spread))
+        local left_hits2 = self:raycast_relative(Vec2(-dist, 0), Vec2(0, spread))
 
         local on_right = #right_hits1 > 0 or #right_hits2 > 0
         local on_left = #left_hits1 > 0 or #left_hits2 > 0
@@ -367,8 +371,8 @@ function create_movement(body, feet, propertiesObj)
         -- Log:debug("Against wall: "..tostring(self.against_wall))
         -- Log:debug("Pushging against: "..tostring(self.pushing_against_wall))
         -- Log:debug("Input X: "..tostring(self.input.x))
-        Log:debug("move delay: "..tostring(self.movement_delay))
-        Log:debug("move time: "..tostring(self.movement_time))
+        -- Log:debug("move delay: "..tostring(self.movement_delay))
+        -- Log:debug("move time: "..tostring(self.movement_time))
 
         for k, v in pairs(self.input) do
             self.prev_input[k] = v
