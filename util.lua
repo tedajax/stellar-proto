@@ -25,3 +25,7 @@ function math.sign(v)
         return 0
     end
 end
+
+function math.lerp(a, b, t)
+    return (b - a) * t + a
+end

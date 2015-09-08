@@ -29,7 +29,7 @@ function create_player()
     self.foot_shape = love.physics.newCircleShape(
         0,
         self.height / 2 - self.width / 4,
-        self.width / 2
+        self.width / 2 + 2
     )
     self.foot_fixture = love.physics.newFixture(self.body, self.foot_shape)
     self.foot_fixture:setFilterData(get_collision_filter("cPlayer"))

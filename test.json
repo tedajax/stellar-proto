@@ -1,21 +1,21 @@
 {
     "platforms": [
         {
-            "x": 64,
-            "y": 0,
+            "x": 600,
+            "y": 400,
             "width": 128,
             "height": 32,
             "controller": {
                 "type": "tween_position",
                 "endpoint_offset": {
-                    "x": 256,
-                    "y": 0,
+                    "x": 0,
+                    "y": -900,
                 },
                 "tween": {
                     "start": 0,
                     "dest": 1,
-                    "time": 5,
-                    "func": "linear"
+                    "time": 10,
+                    "func": "sin_wave"
                 }
             }
         }

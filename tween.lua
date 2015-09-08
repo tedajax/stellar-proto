@@ -35,7 +35,7 @@ local function _nothing_() end
 
 --[[
 
-All tween functions must conform to 
+All tween functions must conform to
 
 t: Current time of the tween in seconds.
 i: Initial value.
@@ -322,7 +322,7 @@ function Tween:add_properties(properties)
         assert(f ~= nil, "No known tweening function registered for '"..properties.func.."'.")
     end
 
-    return 
+    return self:add(properties.start, properties.dest, properties.time, f, properties.reverse, properties.count)
 end
 
 function Tween:update(dt)
@@ -344,8 +344,9 @@ end
 local default = new()
 
 return setmetatable({
-    new         = new,
-    add         = function(...) return default:add(...) end,
-    update      = function(...) return default:update(...) end,
-    functions   = tweenFunctions,
+    new             = new,
+    add             = function(...) return default:add(...) end,
+    add_properties  = function(...) return default:add_properties(...) end,
+    update          = function(...) return default:update(...) end,
+    functions       = tweenFunctions,
 }, {__call = new})

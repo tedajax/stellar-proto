@@ -23,7 +23,7 @@
     "wall_jump_response_time": 0.05,
     "raycasts": {
         "ground": {
-            "distance": 10,
+            "distance": 12,
             "spread": 10
         },
         "walls": {

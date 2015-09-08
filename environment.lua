@@ -58,6 +58,8 @@ function create_wall()
     return self
 end
 
+PLATFORM_CONTROLLERS = {}
+
 -- platforms are kinematic parts of the environment that can be moved by their own behaviors
 function create_platform()
     local self = {}
@@ -78,14 +80,14 @@ function create_platform()
 
     self.controller = nil
 
-    self.activate = function(self, x, y, w, h, controller)
-        self.position = Vec2(x, y)
-        self.width = w
-        self.height = h
+    self.activate = function(self, properties)
+        self.position = Vec2(properties.x, properties.y)
+        self.width = properties.width
+        self.height = properties.height
         self.rotation = 0
 
-        self.body:setX(x)
-        self.body:setY(y)
+        self.body:setX(self.position.x)
+        self.body:setY(self.position.y)
         self.body:setActive(true)
         self.body:setAngle(0)
         self.shape = love.physics.newRectangleShape(
@@ -96,8 +98,9 @@ function create_platform()
         self.fixture:setFilterData(get_collision_filter("cEnvironment"))
         self.fixture:setUserData(self)
 
-        if controller ~= nil then
-            controller:posess(self)
+        if properties.controller ~= nil then
+            local c = create_platform_controller(properties.controller)
+            c:posess(self)
         end
     end
 
@@ -135,41 +138,56 @@ function create_platform()
     return self
 end
 
-function create_platform_controller_simple()
+function register_platform_controller(typename, createfunc)
+    assert(PLATFORM_CONTROLLERS[typename] == nil)
+    PLATFORM_CONTROLLERS[typename] = createfunc
+end
+
+function create_platform_controller(properties)
+    local f = PLATFORM_CONTROLLERS[properties.type]
+    assert(type(f) == "function", "Unable to find platform controller given by type.")
+    return f(properties)
+end
+
+function create_platform_controller_tween_position(properties)
     local self = create_controller()
 
-    self.start_x = 0
-    self.distance = 300
-    self.speed = 500
-    self.direction = 1
+    self.properties = properties
+    self.tween = nil
+    self.base_position = Vec2(0, 0)
+    self.end_position = Vec2(0, 0)
+    self.last_position = Vec2(0, 0)
     self.velocity = Vec2(0, 0)
 
     self.on_posess = function(self)
-        self.start_x = self.actor.position.x
+        self.base_position.x = self.actor.position.x
+        self.base_position.y = self.actor.position.y
+        self.last_position.x = self.base_position.x
+        self.last_position.y = self.base_position.y
+        self.end_position.x = self.base_position.x + self.properties.endpoint_offset.x
+        self.end_position.y = self.base_position.y + self.properties.endpoint_offset.y
+        self.tween = Tween.add_properties(self.properties.tween)
     end
 
     self.on_update = function(self, dt)
-        local x = self.actor.position.x
-        if self.direction > 0 then
-            self.velocity.x = self.speed * dt
-            x = x + self.velocity.x
-            if x >= self.start_x + self.distance then
-                x = self.start_x + self.distance
-                self.direction = -1
-            end
-        elseif self.direction < 0 then
-            self.velocity.x = -self.speed * dt
-            x = x + self.velocity.x
-            if x <= self.start_x then
-                x = self.start_x
-                self.direction = 1
-            end
-        end
-        self.actor:set_position(x, self.actor.position.y)
+        local t = self.tween:evaluate()
+
+        local x = math.lerp(self.base_position.x, self.end_position.x, t)
+        local y = math.lerp(self.base_position.y, self.end_position.y, t)
+
+        self.actor:set_position(x, y)
+
+        self.velocity.x = x - self.last_position.x
+        self.velocity.y = y - self.last_position.y
+
+        self.last_position.x = x
+        self.last_position.y = y
     end
 
     return self
 end
+
+register_platform_controller("tween_position", create_platform_controller_tween_position)
 
 function create_environment_manager(capacity)
     local self = {}

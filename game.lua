@@ -1,5 +1,6 @@
 local json = require 'json'
 local Vec2 = require 'vec2'
+Tween = require 'tween'
 require 'player'
 require 'npc'
 require 'collision'
@@ -27,7 +28,7 @@ function create_game()
         self.tilemap = create_tilemap(levelObj.tilemap)
         self.tilemap:recalculate(self.environment_manager)
 
-        -- self.environment_manager:add_platform(-400, -50, 100, 24, create_platform_controller_simple())
+        self.environment_manager:add_platform(levelObj.platforms[1])
 
         local spawn_pos = self.tilemap:get_spawn_position()
         self.player:set_position(spawn_pos)
@@ -46,6 +47,7 @@ function create_game()
         self.bullet_manager:update(dt)
         self.npc_manager:update(dt)
         self.environment_manager:update(dt)
+        Tween.update(dt)
     end
 
     self.render = function(self)
