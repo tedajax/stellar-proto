@@ -23,8 +23,8 @@ function create_game()
 
         self.environment_manager = create_environment_manager(200)
 
-        local tmapobj = json.load("test.json")
-        self.tilemap = create_tilemap(tmapobj)
+        local levelObj = json.load("test.json")
+        self.tilemap = create_tilemap(levelObj.tilemap)
         self.tilemap:recalculate(self.environment_manager)
 
         -- self.environment_manager:add_platform(-400, -50, 100, 24, create_platform_controller_simple())
