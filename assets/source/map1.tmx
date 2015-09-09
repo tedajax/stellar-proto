@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="72" height="36" tilewidth="32" tileheight="32" nextobjectid="5">
+ <tileset firstgid="1" name="Basic" tilewidth="32" tileheight="32" tilecount="1">
+  <tile id="0">
+   <image width="32" height="32" source="../tile_orange.png"/>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="72" height="36">
+  <data encoding="base64" compression="zlib">
+   eJztl0EOgzAMBOH/n+61BxivjZOiekfKZd2QaIiIex7HcXrgMNfYD2M/jP0w9sPYD2M/jP0w9sPs7C1pTuX5O/rbX5yfOz/qb5VaF51+1Pc51U9mTSWjPKp1YT+M/TCr/ER3lZJRHtW6mHZ+sr3JdD/KXfvET7VPVDLKoxrNqfSgO3mjH1rffuL/PZ0o70TJKI9qNCfjyOeHHU3zk8V+mG8/6tnrGFf7uNsf7X0lld6la10lozyqPUXtj1atrWSUR7UnZPrHVesrGeVRrUqmd1zFW/1kvpcreaOf7H0yicp9O4VqPzKBnf3eP48PbBUByQ==
+  </data>
+ </layer>
+ <objectgroup name="Platforms">
+  <object id="1" type="platform" x="1600" y="320" width="128" height="32">
+   <properties>
+    <property name="controller" value="tween_position"/>
+    <property name="endpoint_offset_x" value="0"/>
+    <property name="endpoint_offset_y" value="672"/>
+    <property name="tween_dest" value="1"/>
+    <property name="tween_duration" value="10"/>
+    <property name="tween_function" value="sin_wave"/>
+    <property name="tween_start" value="0"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>
