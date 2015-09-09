@@ -18,7 +18,7 @@ function create_object_pool(create_func, capacity)
     self.free_head = capacity
 
     self.pop_index = function(self)
-        assert(self.free_head > 1, "No more free space in pool.  Increase capacity.")
+        assert(self.free_head > 0, "No more free space in pool with capacity "..tostring(self.capacity)..".  Increase capacity.")
         local result = self.free_indices[self.free_head]
         self.free_head = self.free_head - 1
         return result

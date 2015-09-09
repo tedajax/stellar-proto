@@ -43,18 +43,6 @@ function create_wall()
         if self.fixture ~= nil then self.fixture:destroy() end
     end
 
-    self.render = function(self)
-        -- love.graphics.push()
-        -- love.graphics.translate(self.position.x, self.position.y)
-        -- love.graphics.setColor(0, 255, 0)
-        -- love.graphics.rectangle("fill",
-        --     -self.width / 2,
-        --     -self.height / 2,
-        --     self.width,
-        --     self.height)
-        -- love.graphics.pop()
-    end
-
     return self
 end
 
@@ -80,16 +68,16 @@ function create_platform()
 
     self.controller = nil
 
-    self.activate = function(self, properties)
-        self.position = Vec2(properties.x, properties.y)
-        self.width = properties.width
-        self.height = properties.height
-        self.rotation = 0
+    self.activate = function(self, x, y, w, h, r, controller)
+        self.position = Vec2(x, y)
+        self.width = w
+        self.height = h
+        self.rotation = r
 
         self.body:setX(self.position.x)
         self.body:setY(self.position.y)
         self.body:setActive(true)
-        self.body:setAngle(0)
+        self.body:setAngle(math.rad(self.rotation))
         self.shape = love.physics.newRectangleShape(
             0, 0,
             self.width, self.height
@@ -98,8 +86,8 @@ function create_platform()
         self.fixture:setFilterData(get_collision_filter("cEnvironment"))
         self.fixture:setUserData(self)
 
-        if properties.controller ~= nil then
-            local c = create_platform_controller(properties.controller)
+        if controller ~= nil then
+            local c = create_platform_controller(controller)
             c:posess(self)
         end
     end
@@ -138,15 +126,27 @@ function create_platform()
     return self
 end
 
-function register_platform_controller(typename, createfunc)
+function register_platform_controller(typename, createfunc, parserfunc)
     assert(PLATFORM_CONTROLLERS[typename] == nil)
-    PLATFORM_CONTROLLERS[typename] = createfunc
+    PLATFORM_CONTROLLERS[typename] = {}
+    PLATFORM_CONTROLLERS[typename].create = createfunc
+    PLATFORM_CONTROLLERS[typename].parse = parserfunc
 end
 
 function create_platform_controller(properties)
     local f = PLATFORM_CONTROLLERS[properties.type]
-    assert(type(f) == "function", "Unable to find platform controller given by type.")
-    return f(properties)
+    assert(type(f) == "table", "Unable to find platform controller given by type.")
+    assert(type(f.create) == "function", "Unable to find platform controller given by type.")
+    return f.create(properties)
+end
+
+function parse_platform_controller(controllerProps)
+    if controllerProps == nil then return nil end
+
+    local f = PLATFORM_CONTROLLERS[controllerProps.controller]
+    assert(type(f) == "table", "Unable to find platform controller given by type '"..tostring(controllerProps.controller).."'.")
+    assert(type(f.parse) == "function", "Unable to find platform controller parser given by type '"..tostring(controllerProps.controller).."'.")
+    return f.parse(controllerProps)
 end
 
 function create_platform_controller_tween_position(properties)
@@ -187,51 +187,82 @@ function create_platform_controller_tween_position(properties)
     return self
 end
 
-register_platform_controller("tween_position", create_platform_controller_tween_position)
+function parse_platform_controller_type(controllerProps)
+    return {
+        type = controllerProps.controller
+    }
+end
 
-function create_environment_manager(capacity)
+function parse_platform_controller_tween_position(controllerProps)
+    local properties = parse_platform_controller_type(controllerProps)
+
+    properties.endpoint_offset = {
+        x = controllerProps.endpoint_offset_x,
+        y = controllerProps.endpoint_offset_y,
+    }
+
+    properties.tween = {
+        start   = tonumber(controllerProps.tween_start),
+        dest    = tonumber(controllerProps.tween_dest),
+        time    = tonumber(controllerProps.tween_duration),
+        func    = controllerProps.tween_function,
+        reverse = not not controllerProps.tween_reverse, -- "not not X" is a conversion of string -> boolean believe it or not...
+        count   = tonumber(controllerProps.tween_loops),
+    }
+
+    return properties
+end
+
+register_platform_controller("tween_position", create_platform_controller_tween_position, parse_platform_controller_tween_position)
+
+function create_wall_manager(capacity)
     local self = {}
 
-    self.walls = create_object_pool(create_wall, capacity)
-    self.platforms = create_object_pool(create_platform, capacity)
+    self.pool = create_object_pool(create_wall, capacity)
 
-    self.wall_width = 32
-    self.wall_height = 32
-
-    self.add_wall = function(self, ...)
-        return self.walls:add(...)
+    self.add = function(self, ...)
+        return self.pool:add(...)
     end
 
-    self.add_platform = function(self, ...)
-        return self.platforms:add(...)
-    end
-
-    self.remove_wall = function(self, wall)
-        self.walls:remove(wall)
-    end
-
-    self.remove_platform = function(self, platform)
-        self.platforms:remove(platform)
+    self.remove = function(self, wall)
+        self.pool:remove(wall)
     end
 
     self.update = function(self, dt)
-        self.walls:remove_flagged()
-        self.platforms:remove_flagged()
-        self.platforms:execute_obj_func("update", dt)
-    end
-
-    self.render = function(self)
-        self.walls:execute_obj_func("render")
-        self.platforms:execute_obj_func("render")
-    end
-
-    self.clear_walls = function(self)
-        self.walls:clear()
+        self.pool:remove_flagged()
     end
 
     self.clear = function(self)
-        self.walls:clear()
-        self.platforms:clear()
+        self.pool:clear()
+    end
+
+    return self
+end
+
+function create_platform_manager(capacity)
+    local self = {}
+
+    self.pool = create_object_pool(create_platform, capacity)
+
+    self.add = function(self, ...)
+        return self.pool:add(...)
+    end
+
+    self.remove = function(self, platform)
+        self.pool:remove(platform)
+    end
+
+    self.update = function(self, dt)
+        self.pool:remove_flagged()
+        self.pool:execute_obj_func("update", dt)
+    end
+
+    self.render = function(self)
+        self.pool:execute_obj_func("render")
+    end
+
+    self.clear = function(self)
+        self.pool:clear()
     end
 
     return self

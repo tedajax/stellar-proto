@@ -13,7 +13,7 @@
         }, 
         {
          "draworder":"topdown",
-         "height":36,
+         "height":0,
          "name":"Platforms",
          "objects":[
                 {
@@ -40,7 +40,7 @@
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
-         "width":72,
+         "width":0,
          "x":0,
          "y":0
         }],

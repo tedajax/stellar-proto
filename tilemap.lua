@@ -16,7 +16,7 @@ function create_tilemap(tilemapObj)
     self.tile_width = tilemapObj.tile_width
     self.tile_height = tilemapObj.tile_height
 
-    local originObj = tilemapObj.origin or { x = -(self.width * self.tile_width) / 2, y = -(self.height * self.tile_height) / 2 }
+    local originObj = tilemapObj.origin or { x = 0, y = 0 }
     local offsetObj = tilemapObj.offset or { x = 0, y = 0 }
     self.origin = Vec2(originObj.x, originObj.y) + Vec2(offsetObj.x, offsetObj.y)
 
@@ -78,8 +78,8 @@ function create_tilemap(tilemapObj)
 
     -- goes through the tile data and recreates walls and everything
     -- expensive, only call after setting tile data!
-    self.recalculate = function(self, environment_manager)
-        environment_manager:clear_walls()
+    self.recalculate = function(self, wall_manager)
+        wall_manager:clear()
 
         local usedTiles = {}
         for i, _ in ipairs(self.tiles) do table.insert(usedTiles, false) end
@@ -132,7 +132,7 @@ function create_tilemap(tilemapObj)
         for i, w in ipairs(walls) do
             local tl = self:tile_to_world_space(Vec2(w.l, w.t), "topleft")
             local br = self:tile_to_world_space(Vec2(w.r, w.b), "bottomright")
-            environment_manager:add_wall(tl.x, br.x, tl.y, br.y)
+            wall_manager:add(tl.x, br.x, tl.y, br.y)
         end
 
     end

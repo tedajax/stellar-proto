@@ -7,6 +7,7 @@ require 'collision'
 require 'tilemap'
 require 'bullet'
 require 'environment'
+require 'level'
 
 function create_game()
     local self = {}
@@ -22,15 +23,10 @@ function create_game()
 
         self.npc_manager = create_npc_manager(100)
 
-        self.environment_manager = create_environment_manager(200)
+        local levelObj = json.load("assets/map1.json")
+        self.level = create_level(levelObj)
 
-        local levelObj = json.load("test.json")
-        self.tilemap = create_tilemap(levelObj.tilemap)
-        self.tilemap:recalculate(self.environment_manager)
-
-        self.environment_manager:add_platform(levelObj.platforms[1])
-
-        local spawn_pos = self.tilemap:get_spawn_position()
+        local spawn_pos = self.level:get_spawn_position()
         self.player:set_position(spawn_pos)
 
         self.bullet_manager = create_bullet_manager(100)
@@ -46,7 +42,7 @@ function create_game()
         self.player:update(dt)
         self.bullet_manager:update(dt)
         self.npc_manager:update(dt)
-        self.environment_manager:update(dt)
+        self.level:update(dt)
         Tween.update(dt)
     end
 
@@ -54,8 +50,7 @@ function create_game()
         self.player:render()
         self.bullet_manager:render()
         self.npc_manager:render()
-        self.tilemap:render()
-        self.environment_manager:render()
+        self.level:render()
 
         self.collision:debug_render(false)
     end
