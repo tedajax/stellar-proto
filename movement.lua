@@ -47,6 +47,8 @@ function create_movement(body, feet, propertiesObj)
     self.stop_wall_slide = false
     self.wall_stick_timer = 0
 
+    self.ramp_angle = 0
+
     self.movement_time = 0
     self.movement_delay = 0
 
@@ -80,16 +82,32 @@ function create_movement(body, feet, propertiesObj)
     self.check_on_ground = function(self)
         local dist = self.properties.raycasts.ground.distance
         local spread = self.properties.raycasts.ground.spread / 2
-        local static_hits1 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet:getPoint()) + Vec2(-spread, 0), "cStaticEnvironment")
-        local static_hits2 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet:getPoint()) + Vec2(spread, 0), "cStaticEnvironment")
+        local static_hits = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()), "cStaticEnvironment")
+        -- local static_hits1 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(-spread, 0), "cStaticEnvironment")
+        -- local static_hits2 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(spread, 0), "cStaticEnvironment")
 
         local prev_on_ground = self.is_on_ground
-        self.is_on_ground = #static_hits1 > 0 or #static_hits2 > 0
+
+
+        if #static_hits > 0 and static_hits[1].distance <= 1 then
+            self.is_on_ground = true
+        else
+            self.is_on_ground = false
+        end
+
+        if self.is_on_ground then
+            local hit = static_hits[1]
+            self.ramp_angle = Vec2(0, -1):angle(hit.normal)
+            Log:debug("ramp angle: "..tostring(self.ramp_angle))
+        else
+            self.ramp_angle = 0
+        end
+
         self.on_moving_platform = nil
 
         if not self.is_on_ground then
-            local platform_hits1 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet:getPoint()) + Vec2(-spread, 0), "cEnvironment")
-            local platform_hits2 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet:getPoint()) + Vec2(spread, 0), "cEnvironment")
+            local platform_hits1 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(-spread, 0), "cEnvironment")
+            local platform_hits2 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(spread, 0), "cEnvironment")
 
             if #platform_hits1 > 0 or #platform_hits2 > 0 then
                 local fixture = nil
@@ -247,7 +265,7 @@ function create_movement(body, feet, propertiesObj)
         elseif preForceVx <= -max_speed and velocity.x < 0 then
             velocity.x = 0
         end
-        self.body:applyLinearImpulse(velocity.x, 0)
+        self.body:applyLinearImpulse(velocity.x, self.ramp_angle * -0.4)
 
         -- Determine if the player is pushing against a wall
         if self.input.x > 0 and self.against_wall == WALL_CONTACTS.cRight then
@@ -331,7 +349,6 @@ function create_movement(body, feet, propertiesObj)
             end
             -- lvx = lvx * (1 - friction)
         end
-
 
         if self.is_stuck_to_wall then
             local max_slide_speed = self.properties.wall_slide_max_speed

@@ -20,7 +20,7 @@ function create_tile_layer(levelProps, layerProps)
 
     self.wall_manager = create_wall_manager(layerProps.width * layerProps.height)
 
-    self.tilemap = create_tilemap(tilemap_properties)
+    self.tilemap = create_tilemap(tilemap_properties, levelProps.tilesets[1])
     self.tilemap:recalculate(self.wall_manager)
 
     self.update = function(self, dt)

@@ -15,6 +15,7 @@ function create_player()
 
     self.body = love.physics.newBody(Game.collision.world, 0, 0, "dynamic")
     self.body:setFixedRotation(true)
+    self.body:setLinearDamping(0.1)
 
     self.shape = love.physics.newRectangleShape(
         0,
@@ -86,7 +87,7 @@ function create_player_controller(player)
         local movementProps = json.load("movement.json")
         self.movement = create_movement(
             self.actor.body,
-            self.actor.foot_shape,
+            { shape = self.actor.foot_shape, fixture = self.actor.foot_fixture },
             movementProps
         )
     end
@@ -137,6 +138,30 @@ function create_player_controller(player)
 
     self.set_position = function(self, pos)
         self.actor:setPosition(pos)
+    end
+
+    return self
+end
+
+function create_player_noclip_controller(player)
+    local self = create_controller(player)
+
+    self.on_posess = function(self)
+        self.actor.body:setActive(false)
+    end
+
+    self.on_unposess = function(self)
+        self.actor.body:setActive(true)
+    end
+
+    self.on_update = function(self, dt)
+        local h = Input:get_axis("horizontal")
+        local v = Input:get_axis("vertical")
+
+        self.actor.position.x = self.actor.position.x + 800 * h * dt
+        self.actor.position.y = self.actor.position.y + 800 * v * dt
+
+        self.actor.body:setPosition(self.actor.position.x, self.actor.position.y)
     end
 
     return self

@@ -1,7 +1,6 @@
 local json = require 'dkjson'
 
 local function load(filename)
-    print("Decoding json file: "..filename)
     local str = love.filesystem.read(filename)
     return json.decode(str, 1, nil)
 end

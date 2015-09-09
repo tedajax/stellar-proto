@@ -19,23 +19,48 @@ function create_wall()
     self.shape = nil
     self.fixture = nil
 
-    self.activate = function(self, l, r, t, b)
-        local x = (l + r) / 2
-        local y = (t + b) / 2
-        self.position = Vec2(x, y)
-        self.width = math.abs(r - l)
-        self.height = math.abs(b - t)
+    self.activate = function(self, properties)
+        if properties.type == "normal" then
+            local l, r, t, b = properties.l, properties.r, properties.t, properties.b
+            local x = (l + r) / 2
+            local y = (t + b) / 2
+            self.position = Vec2(x, y)
+            self.width = math.abs(r - l)
+            self.height = math.abs(b - t)
 
-        self.body:setX(x)
-        self.body:setY(y)
-        self.body:setActive(true)
-        self.body:setAngle(0)
-        self.shape = love.physics.newRectangleShape(
-            0, 0,
-            self.width, self.height
-        )
-        self.fixture = love.physics.newFixture(self.body, self.shape)
-        self.fixture:setFilterData(get_collision_filter("cStaticEnvironment"))
+            self.body:setX(x)
+            self.body:setY(y)
+            self.body:setActive(true)
+            self.body:setAngle(0)
+            self.shape = love.physics.newRectangleShape(
+                0, 0,
+                self.width, self.height
+            )
+            self.fixture = love.physics.newFixture(self.body, self.shape)
+            self.fixture:setFilterData(get_collision_filter("cStaticEnvironment"))
+        elseif properties.type == "ramp" then
+            local first = properties.first
+            local last = properties.last
+            local direction = properties.direction
+            local x = (first.x + last.x) / 2
+            local y = (first.y + last.y) / 2
+            local w = math.abs(first.x - last.x)
+            local h = math.abs(first.y - last.y)
+            self.position = Vec2(x, y)
+            local rotation = direction * -90
+
+            self.body:setX(x)
+            self.body:setY(y)
+            self.body:setActive(true)
+            self.body:setAngle(math.rad(rotation))
+            self.shape = love.physics.newEdgeShape(
+                -w / 2, h / 2,
+                w / 2, -h / 2
+            )
+            self.fixture = love.physics.newFixture(self.body, self.shape)
+            self.fixture:setFilterData(get_collision_filter("cStaticEnvironment"))
+            self.fixture:setFriction(0.2)
+        end
     end
 
     self.release = function(self)

@@ -155,6 +155,33 @@ function create_collision()
                             points[#points]
                         )
                         love.graphics.pop()
+                    elseif shape:getType() == "edge" then
+                        love.graphics.push()
+                        love.graphics.translate(bx, by)
+                        love.graphics.rotate(b:getAngle())
+                        local points = { shape:getPoints() }
+                        for i = 1, #points - 2, 2 do
+                            love.graphics.line(
+                                points[i],
+                                points[i + 1],
+                                points[i + 2],
+                                points[i + 3]
+                            )
+                        end
+
+                        love.graphics.line(
+                            points[1],
+                            points[2],
+                            points[#points - 1],
+                            points[#points]
+                        )
+
+                        love.graphics.setColor(0, 255, 0)
+                        for i = 1, #points, 2 do
+                            love.graphics.circle("fill", points[i], points[i + 1], 4)
+                        end
+
+                        love.graphics.pop()
                     end
 
                     if show_aabb then

@@ -168,6 +168,14 @@ function vec2:perpendicular()
     return new(-self.y, self.x)
 end
 
+function vec2:angle(v)
+    assert(isvec2(v), "angle: wrong argument types (<vec2> expected)")
+    local d = self:dot(v)
+    local A = self:len()
+    local B = v:len()
+    return math.deg(math.acos(d / (A * B)))
+end
+
 function vec2:project_on(v)
     assert(isvec2(v), "invalid argument: cannot project vec2 on " .. type(v))
     -- (self * v) * v / v:len2()
@@ -185,6 +193,11 @@ end
 function vec2:cross(v)
     assert(isvec2(v), "cross: wrong argument types (<vec2> expected)")
     return self.x * v.y - self.y * v.x
+end
+
+function vec2:dot(v)
+    assert(isvec2(v), "dot: wrong argument types (<vec2> expected)")
+    return self.x * v.x + self.y * v.y
 end
 
 local function new_zero() return new(0, 0) end

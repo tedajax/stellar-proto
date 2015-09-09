@@ -16,8 +16,10 @@ function create_game()
 
     self.init = function(self)
         self.player = create_player()
-        local controller = create_player_controller(self.player)
-        controller:initialize()
+        self.player_controller = create_player_controller(self.player)
+        self.player_controller:initialize()
+
+        self.noclip_controller = create_player_noclip_controller()
 
         Camera:set_target(self.player.position)
 
@@ -30,7 +32,7 @@ function create_game()
         self.player:set_position(spawn_pos)
 
         self.bullet_manager = create_bullet_manager(100)
-        controller.bullet_manager = self.bullet_manager
+        self.player_controller.bullet_manager = self.bullet_manager
 
         for i = 1, 10 do
             -- self.npc_manager:add(math.random(-300, 300), math.random(-150, 150))
@@ -47,12 +49,36 @@ function create_game()
     end
 
     self.render = function(self)
+        Camera:push()
         self.player:render()
         self.bullet_manager:render()
         self.npc_manager:render()
         self.level:render()
-
         self.collision:debug_render(false)
+        Camera:pop()
+
+        -- love.graphics.setColor(0, 255, 0)
+        -- love.graphics.print(love.timer.getFPS(), 5, 5)
+        -- love.graphics.print("Player Position: < "..tostring(self.player.position.x)..", "..tostring(self.player.position.y).." >", 5, 25)
+    end
+
+    self.on_key_down = function(self, key)
+        if key == "n" then
+            if self.noclip_controller.actor == nil then
+                self.player_controller:unposess()
+                self.noclip_controller:posess(self.player)
+            else
+                self.noclip_controller:unposess()
+                self.player_controller:posess(self.player)
+            end
+        elseif key == "[" then
+            Camera:zoom_out(1)
+        elseif key == "]" then
+            Camera:zoom_in(1)
+        end
+    end
+
+    self.on_key_up = function(self, key)
     end
 
     return self

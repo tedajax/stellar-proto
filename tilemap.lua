@@ -5,10 +5,13 @@ Vec2 = require 'vec2'
 TILE_TYPES = {
     cEmpty = 0,
     cWall = 1,
-    cSpawn = 2,
+    cRampBR = 2,
+    cRampBL = 3,
+    cRampTL = 4,
+    cRampTR = 5,
 }
 
-function create_tilemap(tilemapObj)
+function create_tilemap(tilemapObj, tileset)
     local self = {}
 
     self.width = tilemapObj.width
@@ -22,9 +25,16 @@ function create_tilemap(tilemapObj)
 
     self.tiles = {}
 
-    self.spawn_point = 0
-
-    self.tile_image = love.graphics.newImage("assets/tile_orange.png")
+    -- hacky and very fragile, make better
+    self.tileset = {}
+    self.tileset[0] = { type = TILE_TYPES.cEmpty, image = nil }
+    for tilekey, tile in pairs(tileset.tiles) do
+        local index = tonumber(tilekey) + 1
+        self.tileset[index] = {
+            type = TILE_TYPES[tileset.tileproperties[tilekey].type],
+            image = love.graphics.newImage("assets/"..tile.image)
+        }
+    end
 
     for i = 1, self.width * self.height do
         table.insert(self.tiles, tilemapObj.data[i])
@@ -68,14 +78,6 @@ function create_tilemap(tilemapObj)
         self.tiles[i] = value
     end
 
-    self.get_spawn_position = function(self)
-        if self.spawn_point < 1 then
-            return Vec2(0, 0)
-        else
-            return self:tile_to_world_space(self:index_to_xy(self.spawn_point), "centertop")
-        end
-    end
-
     -- goes through the tile data and recreates walls and everything
     -- expensive, only call after setting tile data!
     self.recalculate = function(self, wall_manager)
@@ -87,8 +89,9 @@ function create_tilemap(tilemapObj)
         local walls = {}
 
         for current, v in ipairs(self.tiles) do
-            if v == TILE_TYPES.cWall and usedTiles[current] == false then
-                local col, row = self:index_to_xy(current):unpack()
+            local t = self.tileset[v].type
+            local col, row = self:index_to_xy(current):unpack()
+            if t == TILE_TYPES.cWall and usedTiles[current] == false then
                 local left = col
                 local right = left
                 for x = left + 1, self.width - 1 do
@@ -124,15 +127,109 @@ function create_tilemap(tilemapObj)
                         usedTiles[i] = true
                     end
                 end
-            elseif v == TILE_TYPES.cSpawn then
-                self.spawn_point = current
+            elseif t >= TILE_TYPES.cRampBR and t <= TILE_TYPES.cRampTR and usedTiles[current] == false then
+                usedTiles[current] = true
+
+                local dy = 0
+                if t == TILE_TYPES.cRampBR or t == TILE_TYPES.cRampTL then
+                    dy = -1
+                else
+                    dy = 1
+                end
+
+                -- decrease current column until we can't anymore
+                local c = col
+                local r = row
+
+                local first = Vec2(col, row)
+                local last = Vec2(col, row)
+
+                while true do
+                    c = c - 1
+                    r = r - dy
+                    local i = self:xy_to_index(c, r)
+
+                    if i < 1 or i >= #self.tiles or usedTiles[i] or self.tileset[self.tiles[i]].type ~= t then
+                        break
+                    end
+                    first.x = c
+                    first.y = r
+
+                end
+
+                c = col
+                r = row
+
+                while true do
+                    c = c + 1
+                    r = r + dy
+                    local i = self:xy_to_index(c, r)
+                    if i < 1 or i >= #self.tiles or usedTiles[i] or self.tileset[self.tiles[i]].type ~= t then
+                        break
+                    end
+                    last.x = c
+                    last.y = r
+                end
+
+                local y = first.y
+                for x = first.x, last.x do
+                    local i = self:xy_to_index(x, y)
+
+                    -- don't consider wall blocks beneath floor ramps
+                    if t == TILE_TYPES.cRampBL or t == TILE_TYPES.cRampBR then
+                        local i2 = self:xy_to_index(x, y + 1)
+                        if i2 > 0 and i2 <= #self.tiles and self.tileset[self.tiles[i2]].type == TILE_TYPES.cWall then
+                            usedTiles[i2] = true
+                        end
+                    end
+
+                    y = y + dy
+                    usedTiles[i] = true
+                end
+
+                local first_origin = "topleft"
+                local last_origin = "bottomright"
+
+                if t == TILE_TYPES.cRampBR or t == TILE_TYPES.cRampTL then
+                    first_origin = "bottomleft"
+                    last_origin = "topright"
+                end
+
+                local properties = {
+                    type = "ramp",
+                    first = self:tile_to_world_space(Vec2(first.x, first.y), first_origin),
+                    last = self:tile_to_world_space(Vec2(last.x, last.y), last_origin),
+                    direction = t - TILE_TYPES.cRampBR
+                }
+
+                wall_manager:add(properties)
             end
         end
+
+        -- local p = {
+        --     type = "ramp",
+        --     first = Vec2(200, 320),
+        --     last = Vec2(400, 270),
+        --     direction = 0
+        -- }
+        -- wall_manager:add(p)
+
+        -- local p2 = {
+        --     type = "ramp",
+        --     first = Vec2(200, 320),
+        --     last = Vec2(400, 220),
+        --     direction = 1
+        -- }
+        -- wall_manager:add(p2)
 
         for i, w in ipairs(walls) do
             local tl = self:tile_to_world_space(Vec2(w.l, w.t), "topleft")
             local br = self:tile_to_world_space(Vec2(w.r, w.b), "bottomright")
-            wall_manager:add(tl.x, br.x, tl.y, br.y)
+            local properties = {
+                type = "normal",
+                l = tl.x, r = br.x, t = tl.y, b = br.y
+            }
+            wall_manager:add(properties)
         end
 
     end
@@ -140,10 +237,11 @@ function create_tilemap(tilemapObj)
     self.render = function(self)
         love.graphics.setColor(255, 255, 255)
         for i, v in ipairs(self.tiles) do
-            if v == TILE_TYPES.cWall then
+            local image = self.tileset[v].image
+            if image ~= nil then
                 local tcoord = self:index_to_xy(i)
                 local wcoord = self:tile_to_world_space(tcoord, "topleft")
-                love.graphics.draw(self.tile_image, wcoord.x, wcoord.y)
+                love.graphics.draw(image, wcoord.x, wcoord.y)
             end
         end
     end

@@ -19,12 +19,12 @@ function create_controller(actor, name)
     self.unposess = function(self)
         if self.actor == nil then return end
 
-        self.actor[self.name] = nil
-        self.actor = nil
-
         if type(self.on_unposess) == "function" then
             self:on_unposess()
         end
+
+        self.actor[self.name] = nil
+        self.actor = nil
     end
 
     self.update = function(self, dt)

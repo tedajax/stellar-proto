@@ -44,25 +44,22 @@ function love.load()
     Game = create_game()
     Game:init()
 
+    Timescale = 1
+
     Log = create_log()
 end
 
 function love.update(dt)
-    Game:update(dt)
-    Camera:update(dt)
+    Game:update(dt * Timescale)
+    Camera:update(dt * Timescale)
     Input:update(dt)
     Log:update(dt)
 end
 
 function love.draw()
-    Camera:push()
     Game:render()
-    Camera:pop()
 
     Log:render()
-
-    love.graphics.setColor(0, 255, 0)
-    love.graphics.print(love.timer.getFPS(), 5, 5)
 end
 
 function love.keypressed(key)
@@ -73,8 +70,10 @@ function love.keypressed(key)
     end
 
     Input:on_key_down(key)
+    Game:on_key_down(key)
 end
 
 function love.keyreleased(key)
     Input:on_key_up(key)
+    Game:on_key_up(key)
 end
