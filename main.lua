@@ -177,5 +177,6 @@ function console_register_commands(console)
         movement = { command_reload_movement, "<filename> -- Reload player movement properties." },
         font = { command_set_font, "<filename> ptsize -- Set console font.  Don't provide filename to just change size." },
         noclip = { function() Game:noclip() end, "noclip -- Toggle noclip mode." },
+        coldbg = { function() Game.debug_collision = not Game.debug_collision end, "coldbg -- Toggle collision debug render." },
     }
 end

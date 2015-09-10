@@ -60,7 +60,7 @@ function create_player()
     end
 
     self.render = function(self)
-        love.graphics.setColor(255, 255, 255, 255)
+        love.graphics.setColor(180, 207, 236, 255)
         love.graphics.rectangle(
             "fill",
             self.position.x - self.width / 2,
@@ -137,7 +137,7 @@ function create_player_controller(player)
     end
 
     self.set_position = function(self, pos)
-        self.actor:setPosition(pos)
+        self.actor:set_position(pos)
     end
 
     return self

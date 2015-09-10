@@ -16,13 +16,13 @@
     "max_jumps": 1,
     "jump_force": 1100,
     "jump_hold_force": 500,
-    "wall_slide_max_speed": 150,
+    "wall_slide_max_speed": 100,
     "wall_gravity_modifier": 0.4,
     "wall_stick_delay": 0.5,
     "wall_slide_idle_time": 1.0,
     "wall_jump_request_window": 0.25,
     "wall_jump_force": { "x": 400, "y": 1200 },
-    "wall_hop_force": { "x": 200, "y": 1000 },
+    "wall_hop_force": { "x": 400, "y": 1000 },
     "wall_jump_response_time": 0.05,
     "raycasts": {
         "ground": {
@@ -30,7 +30,7 @@
             "spread": 14
         },
         "walls": {
-            "distance": 16,
+            "distance": 12,
             "spread": 16
         }
     }

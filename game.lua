@@ -1,6 +1,7 @@
 local Vec2 = require 'vec2'
 Tween = require 'tween'
 require 'player'
+require 'flag'
 require 'npc'
 require 'collision'
 require 'tilemap'
@@ -13,10 +14,15 @@ function create_game()
 
     self.collision = create_collision()
 
+    self.debug_collision = true
+
     self.init = function(self)
         self.player = create_player()
         self.player_controller = create_player_controller(self.player)
         self.player_controller:initialize()
+
+        self.flag = create_flag()
+        self.flag_controller = create_flag_controller(self.flag)
 
         self.noclip_controller = create_player_noclip_controller()
 
@@ -28,6 +34,7 @@ function create_game()
 
         local spawn_pos = self.level:get_spawn_position()
         self.player:set_position(spawn_pos)
+        self.flag:set_position(spawn_pos)
 
         self.bullet_manager = create_bullet_manager(100)
         self.player_controller.bullet_manager = self.bullet_manager
@@ -38,8 +45,10 @@ function create_game()
     end
 
     self.update = function(self, dt)
+        Log:debug("FPS: "..tostring(love.timer.getFPS()))
         self.collision:update(dt)
         self.player:update(dt)
+        self.flag:update(dt)
         self.bullet_manager:update(dt)
         self.npc_manager:update(dt)
         self.level:update(dt)
@@ -49,10 +58,13 @@ function create_game()
     self.render = function(self)
         Camera:push()
         self.player:render()
+        self.flag:render()
         self.bullet_manager:render()
         self.npc_manager:render()
         self.level:render()
-        self.collision:debug_render(false)
+        if self.debug_collision then
+            self.collision:debug_render(false)
+        end
         Camera:pop()
 
         -- love.graphics.setColor(0, 255, 0)

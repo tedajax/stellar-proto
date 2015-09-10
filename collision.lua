@@ -5,6 +5,7 @@ COLLISION_TAGS = {
     cPlayerBullet = 3,
     cEnvironment = 4,
     cStaticEnvironment = 5,
+    cFlag = 6
 }
 
 COLLISION_FILTERS = {}
@@ -19,6 +20,7 @@ register_collision_filter(COLLISION_TAGS.cEnemy,                0x0002, 0x001D, 
 register_collision_filter(COLLISION_TAGS.cPlayerBullet,         0x0004, 0x0016, -1)
 register_collision_filter(COLLISION_TAGS.cEnvironment,          0x0008, 0xffff,  0)
 register_collision_filter(COLLISION_TAGS.cStaticEnvironment,    0x0010, 0xffff,  0)
+register_collision_filter(COLLISION_TAGS.cFlag,                 0x0020, 0x0018,  0)
 
 function get_collision_filter(tag)
     local f = COLLISION_FILTERS[COLLISION_TAGS[tag]]
