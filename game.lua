@@ -60,15 +60,19 @@ function create_game()
         -- love.graphics.print("Player Position: < "..tostring(self.player.position.x)..", "..tostring(self.player.position.y).." >", 5, 25)
     end
 
+    self.noclip = function(self)
+        if self.noclip_controller.actor == nil then
+            self.player_controller:unposess()
+            self.noclip_controller:posess(self.player)
+        else
+            self.noclip_controller:unposess()
+            self.player_controller:posess(self.player)
+        end
+    end
+
     self.on_key_down = function(self, key)
         if key == "n" then
-            if self.noclip_controller.actor == nil then
-                self.player_controller:unposess()
-                self.noclip_controller:posess(self.player)
-            else
-                self.noclip_controller:unposess()
-                self.player_controller:posess(self.player)
-            end
+            self:noclip()
         elseif key == "[" then
             Camera:zoom_out(0.25)
         elseif key == "]" then

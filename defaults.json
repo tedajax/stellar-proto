@@ -4,7 +4,7 @@
         "version": "proto 1",
         "movement_props": "movement.json",
         "world": {
-            "gravity": 6000
+            "gravity": 4000
         }
     },
     "console_font": {

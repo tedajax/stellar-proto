@@ -289,7 +289,7 @@ function create_movement(body, feet, propertiesObj)
         elseif preForceVx <= -max_speed and velocity.x < 0 then
             velocity.x = 0
         end
-        self.body:applyLinearImpulse(velocity.x, self.ramp_angle * -0.4)
+        self.body:applyLinearImpulse(velocity.x, self.ramp_angle * -0.15)
 
         -- Determine if the player is pushing against a wall
         if self.input.x > 0 and self.against_wall == WALL_CONTACTS.cRight then
