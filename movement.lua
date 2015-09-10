@@ -212,15 +212,29 @@ function create_movement(body, feet, propertiesObj)
         self.jump_requested = false
     end
 
-    self.wall_jump = function(self, scalar)
+    self.wall_jump_base = function(self, fx, fy)
         self:on_wall_unstick()
         self.is_jumping = true
         self.used_jumps = 1
         local _, vy = self.body:getLinearVelocity()
         if vy > 0 then vy = 0 end
         self.body:setLinearVelocity(0, vy)
-        self.body:applyLinearImpulse(scalar * self.properties.wall_jump_force.x, -self.properties.wall_jump_force.y)
+        self.body:applyLinearImpulse(fx, fy)
         self.jump_requested = false
+    end
+
+    self.wall_jump = function(self, scalar)
+        self:wall_jump_base(
+            scalar * self.properties.wall_jump_force.x,
+            -self.properties.wall_jump_force.y
+        )
+    end
+
+    self.wall_hop = function(self, scalar)
+        self:wall_jump_base(
+            scalar * self.properties.wall_hop_force.x,
+            -self.properties.wall_hop_force.y
+        )
     end
 
     self.update = function(self, dt)
@@ -301,10 +315,18 @@ function create_movement(body, feet, propertiesObj)
 
                 -- here's where the wall jump action is
                 if self.jump_requested then
-                    if self.against_wall == WALL_CONTACTS.cRight and self.input.x < 0 then
-                        self:wall_jump(-1)
-                    elseif self.against_wall == WALL_CONTACTS.cLeft and self.input.x > 0 then
-                        self:wall_jump(1)
+                    if self.against_wall == WALL_CONTACTS.cRight then
+                        if self.input.x < 0 then
+                            self:wall_jump(-1)
+                        elseif self.input.x > 0 then
+                            self:wall_hop(-1)
+                        end
+                    elseif self.against_wall == WALL_CONTACTS.cLeft then
+                        if self.input.x > 0 then
+                            self:wall_jump(1)
+                        elseif self.input.x < 0 then
+                            self:wall_hop(1)
+                        end
                     end
                 end
 

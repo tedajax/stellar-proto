@@ -25,12 +25,8 @@ function create_camera(x, y)
     end
 
     self.look_at = function(self, x, y)
-        self.position.x = x - love.graphics.getWidth() / 2
-        self.position.y = y - love.graphics.getHeight() / 2
-    end
-
-    self.get_center = function(self)
-        return self.position.x + love.graphics.getWidth() / 2, self.position.y + love.graphics.getHeight() / 2
+        self.position.x = x
+        self.position.y = y
     end
 
     self.rotate = function(self, angle)
@@ -82,7 +78,7 @@ function create_camera(x, y)
         end
 
         if self.target ~= nil then
-            local cx, cy = self:get_center()
+            local cx, cy = self.position.x, self.position.y
             local nx, ny = cx, cy
 
             if self.target.x > cx + self.follow_bounds.r then
@@ -107,15 +103,17 @@ function create_camera(x, y)
 
     self.push = function(self)
         love.graphics.push()
-        love.graphics.translate(
-            -(self.position.x + self.shake_pos.x),
-            -(self.position.y + self.shake_pos.y)
-        )
+        love.graphics.translate(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
         love.graphics.rotate(-math.rad(self.rotation))
         love.graphics.scale(
             math.abs(1 / (self.zoom + self.base_zoom)),
             math.abs(1 / (self.zoom + self.base_zoom))
         )
+        love.graphics.translate(
+            -(self.position.x + self.shake_pos.x),
+            -(self.position.y + self.shake_pos.y)
+        )
+
     end
 
     self.pop = function(self)

@@ -70,9 +70,9 @@ function create_game()
                 self.player_controller:posess(self.player)
             end
         elseif key == "[" then
-            Camera:zoom_out(1)
+            Camera:zoom_out(0.25)
         elseif key == "]" then
-            Camera:zoom_in(1)
+            Camera:zoom_in(0.25)
         end
     end
 
