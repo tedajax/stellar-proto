@@ -84,7 +84,7 @@ function create_player_controller(player)
     self.bullet_manager = nil
 
     self.initialize = function(self)
-        local movementProps = json.load("movement.json")
+        local movementProps = json.load(Defaults.game.movement_props)
         self.movement = create_movement(
             self.actor.body,
             { shape = self.actor.foot_shape, fixture = self.actor.foot_fixture },

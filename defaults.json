@@ -1,0 +1,14 @@
+{
+    "game": {
+        "name": "Stellar",
+        "version": "proto 1",
+        "movement_props": "movement.json",
+        "world": {
+            "gravity": 6000
+        }
+    },
+    "console_font": {
+        "filename": "assets/fonts/VeraMono.ttf",
+        "ptsize": 14
+    }
+}

@@ -23,10 +23,12 @@ function love.load()
     Screen.base_width = 1280
     Screen.base_height = 720
 
-    local consoleFont = { filename = "assets/fonts/VeraMono.ttf", ptsize = 14 }
+    Defaults = json.load("defaults.json")
+
+    local consoleFont = Defaults.console_font
     Console = console.new(consoleFont, Screen.width, 400, 4, function() end)
     console_register_commands(Console)
-    Console:print_intro("Stellar", "0.0.1")
+    Console:print_intro(Defaults.game.name, Defaults.game.version)
 
     Input = create_input()
 
@@ -117,7 +119,7 @@ local function command_set_font(p1, p2)
 end
 
 local function command_display_commands()
-    Console:print("---------------------------------------------------------------------------------------------------")
+    Console:print("-------------------------------------------------------------------------------------------------------------------------------")
     Console:print("Comands are executed as the name of the command followed by whitespace delimited parameters (e.g.):")
     Console:print("> help")
     Console:print("> clear")
@@ -135,10 +137,11 @@ local function command_display_commands()
             Console:print(s)
         end
     end
+    Console:print("-------------------------------------------------------------------------------------------------------------------------------")
 end
 
 local function command_display_help()
-    Console:print("--------------------------------------------------")
+    Console:print("-------------------------------------------------------------------------------------------------------------------------------")
     Console:print("Arbitrary Lua can be executed within this console.")
     Console:print("> print(\"hello, world\")")
     Console:print("hello, world")
@@ -152,10 +155,14 @@ local function command_display_help()
     Console:print("For a list of available commands use the 'commands' command")
     Console:print("> commands")
     Console:print("...")
+    Console:print(" ")
     Console:print("You can also cycle through history with the up/down arrow keys.")
     Console:print("Using the <tab> key will cycle through autocomplete with varying degrees of success.")
+    Console:print("-------------------------------------------------------------------------------------------------------------------------------")
 end
 
+quit = love.event.quit
+exit = love.event.quit
 print = function(...) _print(...); Console:print(...) end
 help = command_display_help
 

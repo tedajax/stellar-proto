@@ -76,11 +76,10 @@ function console:error(...)
 end
 
 function console:print_intro(name, version)
-    self:print(" "..name.." v"..version.." ".._VERSION)
+    self:print(" "..name.." version "..version.." -- ".._VERSION)
     self:print()
     self:print(" <Escape> or ~ leaves the console. Call quit() or exit() to quit.")
-    self:print(" Try hitting <Tab> to complete your current input.")
-    self:print(" Use 'help' for more info.")
+    self:print(" Call help() for additional information.")
     self:print()
 end
 

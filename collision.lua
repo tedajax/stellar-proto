@@ -74,7 +74,7 @@ function create_collision()
     Collision = self
 
     love.physics.setMeter(100)
-    self.world = love.physics.newWorld(0, 6000)
+    self.world = love.physics.newWorld(0, Defaults.game.world.gravity)
 
     self.world:setCallbacks(on_begin, on_end, on_pre_solve, on_post_solve)
 
