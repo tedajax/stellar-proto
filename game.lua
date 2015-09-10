@@ -1,4 +1,3 @@
-local json = require 'json'
 local Vec2 = require 'vec2'
 Tween = require 'tween'
 require 'player'
@@ -25,8 +24,7 @@ function create_game()
 
         self.npc_manager = create_npc_manager(100)
 
-        local levelObj = json.load("assets/map1.json")
-        self.level = create_level(levelObj)
+        self.level = create_level("assets/map1.json")
 
         local spawn_pos = self.level:get_spawn_position()
         self.player:set_position(spawn_pos)

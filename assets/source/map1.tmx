@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="72" height="36" tilewidth="32" tileheight="32" nextobjectid="5">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="72" height="36" tilewidth="32" tileheight="32" nextobjectid="8">
  <tileset firstgid="1" source="Basic_Tileset.tsx"/>
  <layer name="Tile Layer 1" width="72" height="36">
   <data encoding="csv">
@@ -41,16 +41,23 @@
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 </data>
  </layer>
- <objectgroup name="Platforms">
-  <object id="1" type="platform" x="1600" y="320" width="128" height="32">
+ <objectgroup color="#00ffff" name="Platforms">
+  <object id="1" name="Lift" type="platform" x="1600" y="320" width="128" height="160">
    <properties>
     <property name="controller" value="tween_position"/>
     <property name="endpoint_offset_x" value="0"/>
     <property name="endpoint_offset_y" value="672"/>
     <property name="tween_dest" value="1"/>
     <property name="tween_duration" value="10"/>
-    <property name="tween_function" value="sin_wave"/>
+    <property name="tween_function" value="tri_wave"/>
     <property name="tween_start" value="0"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup color="#00ff00" name="LevelControls" opacity="0.5">
+  <object id="6" name="SpawnPoint" type="control" x="960" y="1088" width="32" height="32">
+   <properties>
+    <property name="control_type" value="spawn_point"/>
    </properties>
   </object>
  </objectgroup>

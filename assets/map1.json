@@ -12,14 +12,15 @@
          "y":0
         }, 
         {
+         "color":"#00ffff",
          "draworder":"topdown",
          "height":0,
          "name":"Platforms",
          "objects":[
                 {
-                 "height":32,
+                 "height":160,
                  "id":1,
-                 "name":"",
+                 "name":"Lift",
                  "properties":
                     {
                      "controller":"tween_position",
@@ -27,7 +28,7 @@
                      "endpoint_offset_y":"672",
                      "tween_dest":"1",
                      "tween_duration":"10",
-                     "tween_function":"sin_wave",
+                     "tween_function":"tri_wave",
                      "tween_start":"0"
                     },
                  "rotation":0,
@@ -43,8 +44,36 @@
          "width":0,
          "x":0,
          "y":0
+        }, 
+        {
+         "color":"#00ff00",
+         "draworder":"topdown",
+         "height":36,
+         "name":"LevelControls",
+         "objects":[
+                {
+                 "height":32,
+                 "id":6,
+                 "name":"SpawnPoint",
+                 "properties":
+                    {
+                     "control_type":"spawn_point"
+                    },
+                 "rotation":0,
+                 "type":"control",
+                 "visible":true,
+                 "width":32,
+                 "x":960,
+                 "y":1088
+                }],
+         "opacity":0.5,
+         "type":"objectgroup",
+         "visible":true,
+         "width":72,
+         "x":0,
+         "y":0
         }],
- "nextobjectid":5,
+ "nextobjectid":8,
  "orientation":"orthogonal",
  "properties":
     {

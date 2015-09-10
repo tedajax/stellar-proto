@@ -32,7 +32,7 @@ function create_tilemap(tilemapObj, tileset)
         local index = tonumber(tilekey) + 1
         self.tileset[index] = {
             type = TILE_TYPES[tileset.tileproperties[tilekey].type],
-            image = love.graphics.newImage("assets/"..tile.image)
+            image = love.graphics.newImage(tilemapObj.root_dir..tile.image)
         }
     end
 

@@ -37,6 +37,9 @@ function love.load()
     Input:add_button("fire")
     Input:create_button_binding("fire", "x")
 
+    Input:add_button("debug")
+    Input:create_button_binding("debug", "g")
+
     Camera = create_camera()
     Camera.base_zoom = Screen.base_width / Screen.width
     Camera:look_at(0, 0)

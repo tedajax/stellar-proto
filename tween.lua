@@ -176,6 +176,11 @@ local function cos_wave(t, i, f, d)
     return cos(t * TWO_PI) * (c / 2) + i + (c / 2)
 end
 
+local function tri_wave(t, i, f, d)
+    local a = (2/d) * (t - d * math.floor((t/d) + 0.5)) * math.pow(-1, math.floor((t/d)+0.5))
+    return (f - i) * a + i
+end
+
 tweenFunctions = {
     linear              = linear,
     ease_in_quad        = ease_in_quad,
@@ -196,6 +201,7 @@ tweenFunctions = {
     bounce_in_out       = bounce_in_out,
     sin_wave            = sin_wave,
     cos_wave            = cos_wave,
+    tri_wave            = tri_wave,
 }
 
 local Tween = {}

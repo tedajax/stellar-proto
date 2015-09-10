@@ -82,22 +82,31 @@ function create_movement(body, feet, propertiesObj)
     self.check_on_ground = function(self)
         local dist = self.properties.raycasts.ground.distance
         local spread = self.properties.raycasts.ground.spread / 2
-        local static_hits = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()), "cStaticEnvironment")
-        -- local static_hits1 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(-spread, 0), "cStaticEnvironment")
-        -- local static_hits2 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(spread, 0), "cStaticEnvironment")
+        local static_hits_left = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(-spread, 0), "cStaticEnvironment")
+        local static_hits_right = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(spread, 0), "cStaticEnvironment")
 
         local prev_on_ground = self.is_on_ground
 
 
-        if #static_hits > 0 and static_hits[1].distance <= 1 then
+        if #static_hits_left > 0 and static_hits_left[1].distance <= 1 or
+           #static_hits_right > 0 and static_hits_right[1].distance <= 1 then
             self.is_on_ground = true
         else
             self.is_on_ground = false
         end
 
         if self.is_on_ground then
-            local hit = static_hits[1]
-            self.ramp_angle = Vec2(0, -1):angle(hit.normal)
+            local angle_left = 0
+            local angle_right = 0
+            if #static_hits_left > 0 then
+                local hit = static_hits_left[1]
+                angle_left = Vec2(0, -1):angle(hit.normal)
+            end
+            if #static_hits_right > 0 then
+                local hit = static_hits_right[1]
+                angle_right = Vec2(0, -1):angle(hit.normal)
+            end
+            self.ramp_angle = math.max(angle_left, angle_right)
             Log:debug("ramp angle: "..tostring(self.ramp_angle))
         else
             self.ramp_angle = 0
@@ -383,8 +392,12 @@ function create_movement(body, feet, propertiesObj)
         if self.on_moving_platform ~= nil then
             local bx, by = self.body:getX(), self.body:getY()
             if self.on_moving_platform.controller ~= nil then
-                bx = bx + self.on_moving_platform.controller.velocity.x
-                by = by + self.on_moving_platform.controller.velocity.y
+                local mpv = self.on_moving_platform.controller.velocity
+                if Input:get_button("debug") then
+                    Log:debug("platform x,y: "..tostring(mpv.x)..", "..tostring(mpv.y))
+                end
+                bx = bx + mpv.x
+                by = by + mpv.y
                 self.body:setX(bx)
                 self.body:setY(by)
             end

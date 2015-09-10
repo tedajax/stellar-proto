@@ -1,3 +1,4 @@
+local json = require 'json'
 require 'environment'
 
 function create_tile_layer(levelProps, layerProps)
@@ -16,6 +17,7 @@ function create_tile_layer(levelProps, layerProps)
         height = layerProps.height,
         tile_width = levelProps.tilewidth,
         tile_height = levelProps.tileheight,
+        root_dir = levelProps.root_dir,
     }
 
     self.wall_manager = create_wall_manager(layerProps.width * layerProps.height)
@@ -52,6 +54,8 @@ function create_object_group_layer(levelProps, layerProps)
             local x = v.x + v.width / 2
             local y = v.y + v.height / 2
             self.platform_manager:add(x, y, v.width, v.height, v.rotation, controller)
+        elseif v.type == "control" then
+
         else
             assert(false, "Unknown type for object.")
         end
@@ -73,13 +77,19 @@ LAYER_TYPE_FUNCTIONS = {
     objectgroup = create_object_group_layer,
 }
 
-function create_level(properties)
+function create_level(filename)
     local self = {}
+
+    self.properties = json.load(filename)
+    assert(self.properties, "Unable to load level file: "..filename)
+
+    self.filename = filename
+    self.properties.root_dir = self.filename:match("(.*/)(.*)")
 
     self.layers = {}
 
-    for _, layer in ipairs(properties.layers) do
-        table.insert(self.layers, (LAYER_TYPE_FUNCTIONS[layer.type](properties, layer)))
+    for _, layer in ipairs(self.properties.layers) do
+        table.insert(self.layers, (LAYER_TYPE_FUNCTIONS[layer.type](self.properties, layer)))
     end
 
     self.get_spawn_position = function(self)
