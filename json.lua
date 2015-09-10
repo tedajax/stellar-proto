@@ -2,7 +2,11 @@ local json = require 'dkjson'
 
 local function load(filename)
     local str = love.filesystem.read(filename)
-    return json.decode(str, 1, nil)
+    if str ~= nil then
+        return json.decode(str, 1, nil)
+    else
+        return nil
+    end
 end
 
 local function save(obj, filename)
