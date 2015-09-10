@@ -98,7 +98,7 @@ local function command_set_gravity(gravity)
 end
 
 local function command_reload_movement(filename)
-    filename = filename or "movement.json"
+    filename = filename or Defaults.game.movement_props
     local movementProps = json.load(filename)
     if movementProps ~= nil then
         Game.player_controller.movement:setProperties(movementProps)
