@@ -37,6 +37,15 @@ function collision_filter_test(c1, m1, g1, c2, m2, g2)
     return bit.band(m1, c2) > 0 and bit.band(m2, c1) > 0
 end
 
+function collision_get_mask(...)
+    local arg = {...}
+    local mask = 0
+    for _, t in ipairs(arg) do
+        mask = mask + COLLISION_FILTERS[COLLISION_TAGS[t]].category
+    end
+    return mask
+end
+
 function fixture_call(fixture, func, other, coll)
     local obj = fixture:getUserData()
     if type(obj) == "table" then

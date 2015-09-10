@@ -67,12 +67,7 @@ function create_movement(body, feet, propertiesObj)
         self.jump_requested = true
     end
 
-    self.raycast_relative = function(self, to, offset, tag)
-        local filter = nil
-        if tag then
-            filter = get_collision_filter(tag)
-        end
-
+    self.raycast_relative = function(self, to, offset, filter)
         offset = offset or Vec2(0, 0)
         local body_pos = (Vec2(self.body:getPosition()))
         local s = offset + body_pos
@@ -83,14 +78,23 @@ function create_movement(body, feet, propertiesObj)
     self.check_on_ground = function(self)
         local dist = self.properties.raycasts.ground.distance
         local spread = self.properties.raycasts.ground.spread / 2
-        local static_hits_left = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(-spread, 0), "cStaticEnvironment")
-        local static_hits_right = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(spread, 0), "cStaticEnvironment")
+        local hits_left = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(-spread, 0), collision_get_mask("cStaticEnvironment", "cEnvironment"))
+        local hits_right = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(spread, 0), collision_get_mask("cStaticEnvironment", "cEnvironment"))
 
         local prev_on_ground = self.is_on_ground
 
+        local best_hit = nil
 
-        if #static_hits_left > 0 and static_hits_left[1].distance <= 1 or
-           #static_hits_right > 0 and static_hits_right[1].distance <= 1 then
+        if #hits_left > 0 and hits_left[1].distance <= 1 or
+           #hits_right > 0 and hits_right[1].distance <= 1 then
+            local d_left, d_right = 1, 1
+            if hits_left[1] then d_left = hits_left[1].distance end
+            if hits_right[1] then d_right = hits_right[1].distance end
+            if d_left < d_right then
+                best_hit = hits_left[1]
+            else
+                best_hit = hits_right[1]
+            end
             self.is_on_ground = true
         else
             self.is_on_ground = false
@@ -99,12 +103,12 @@ function create_movement(body, feet, propertiesObj)
         if self.is_on_ground then
             local angle_left = 0
             local angle_right = 0
-            if #static_hits_left > 0 then
-                local hit = static_hits_left[1]
+            if #hits_left > 0 then
+                local hit = hits_left[1]
                 angle_left = Vec2(0, -1):angle(hit.normal)
             end
-            if #static_hits_right > 0 then
-                local hit = static_hits_right[1]
+            if #hits_right > 0 then
+                local hit = hits_right[1]
                 angle_right = Vec2(0, -1):angle(hit.normal)
             end
             self.ramp_angle = math.max(angle_left, angle_right)
@@ -115,24 +119,10 @@ function create_movement(body, feet, propertiesObj)
 
         self.on_moving_platform = nil
 
-        if not self.is_on_ground then
-            local platform_hits1 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(-spread, 0), "cEnvironment")
-            local platform_hits2 = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(spread, 0), "cEnvironment")
-
-            if #platform_hits1 > 0 or #platform_hits2 > 0 then
-                local fixture = nil
-                for _, h in ipairs(platform_hits1) do
-                    fixture = h.fixture
-                end
-                if fixture == nil then
-                    for _, h in ipairs(platform_hits2) do
-                        fixture = h.fixture
-                    end
-                end
-                if fixture ~= nil then
-                    self.is_on_ground = true
-                    self.on_moving_platform = fixture:getUserData()
-                end
+        if best_hit then
+            local env = best_hit.fixture:getUserData()
+            if env and env.controller then
+                self.on_moving_platform = env
             end
         end
 
@@ -148,17 +138,21 @@ function create_movement(body, feet, propertiesObj)
     end
 
     self.check_wall_contacts = function(self)
+        if self.is_on_ground then
+            return
+        end
+
         local dist = self.properties.raycasts.walls.distance
         local spread = self.properties.raycasts.walls.spread / 2
 
-        local right_hits1 = self:raycast_relative(Vec2(dist, 0), Vec2(0, -spread))
-        local right_hits2 = self:raycast_relative(Vec2(dist, 0), Vec2(0, spread))
+        local right_hits_top = self:raycast_relative(Vec2(dist, 0), Vec2(0, -spread))
+        local right_hits_bottom = self:raycast_relative(Vec2(dist, 0), Vec2(0, spread))
 
-        local left_hits1 = self:raycast_relative(Vec2(-dist, 0), Vec2(0, -spread))
-        local left_hits2 = self:raycast_relative(Vec2(-dist, 0), Vec2(0, spread))
+        local left_hits_top = self:raycast_relative(Vec2(-dist, 0), Vec2(0, -spread))
+        local left_hits_bottom = self:raycast_relative(Vec2(-dist, 0), Vec2(0, spread))
 
-        local on_right = #right_hits1 > 0 or #right_hits2 > 0
-        local on_left = #left_hits1 > 0 or #left_hits2 > 0
+        local on_right = #right_hits_top > 0 or #right_hits_bottom > 0
+        local on_left = #left_hits_top > 0 or #left_hits_bottom > 0
 
         -- favors being against the right wall
         -- if being against both walls at once is a desired thing then this
@@ -166,8 +160,32 @@ function create_movement(body, feet, propertiesObj)
         if on_right == false and on_left == false then
             self.against_wall = WALL_CONTACTS.cNone
         elseif on_right == true then
+            local best_hit = nil
+            local top, bottom = right_hits_top[1], right_hits_bottom[1]
+            local d_top, d_bottom = 1, 1
+            if top then d_top = top.distance end
+            if bottom then d_bottom = bottom.distance end
+            if d_top < d_bottom then best_hit = top else best_hit = bottom end
+
+            local env = best_hit.fixture:getUserData()
+            if env and env.controller then
+                self.on_moving_platform = env
+            end
+
             self.against_wall = WALL_CONTACTS.cRight
         else
+            local best_hit = nil
+            local top, bottom = left_hits_top[1], left_hits_bottom[1]
+            local d_top, d_bottom = 1, 1
+            if top then d_top = top.distance end
+            if bottom then d_bottom = bottom.distance end
+            if d_top < d_bottom then best_hit = top else best_hit = bottom end
+
+            local env = best_hit.fixture:getUserData()
+            if env and env.controller then
+                self.on_moving_platform = env
+            end
+
             self.against_wall = WALL_CONTACTS.cLeft
         end
     end
@@ -444,6 +462,7 @@ function create_movement(body, feet, propertiesObj)
         Log:debug("Input X: "..tostring(self.input.x))
         Log:debug("move delay: "..tostring(self.movement_delay))
         Log:debug("move time: "..tostring(self.movement_time))
+        Log:debug("on moving platform: "..tostring(self.on_moving_platform ~= nil))
 
         for k, v in pairs(self.input) do
             self.prev_input[k] = v

@@ -59,6 +59,7 @@ function create_wall()
             )
             self.fixture = love.physics.newFixture(self.body, self.shape)
             self.fixture:setFilterData(get_collision_filter("cStaticEnvironment"))
+            self.fixture:setUserData(self)
             self.fixture:setFriction(0.5)
         end
     end

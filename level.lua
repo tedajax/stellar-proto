@@ -36,6 +36,15 @@ function create_tile_layer(levelProps, layerProps)
     return self
 end
 
+function create_control(x, y, name, type, props)
+    return {
+        position = Vec2(x, y),
+        name = name,
+        type = type,
+        properties = props
+    }
+end
+
 function create_object_group_layer(levelProps, layerProps)
     local self = {}
 
@@ -47,6 +56,7 @@ function create_object_group_layer(levelProps, layerProps)
     self.simulate = true
 
     self.platform_manager = create_platform_manager(#layerProps.objects)
+    self.controls = {}
 
     for i, v in ipairs(layerProps.objects) do
         if v.type == "platform" then
@@ -55,7 +65,7 @@ function create_object_group_layer(levelProps, layerProps)
             local y = v.y + v.height / 2
             self.platform_manager:add(x, y, v.width, v.height, v.rotation, controller)
         elseif v.type == "control" then
-
+            table.insert(self.controls, create_control(v.x, v.y, v.name, v.properties.control_type, v.properties))
         else
             assert(false, "Unknown type for object.")
         end
@@ -93,7 +103,18 @@ function create_level(filename)
     end
 
     self.get_spawn_position = function(self)
-        return Vec2(300, 100)
+        for _, layer in ipairs(self.layers) do
+            Console:print(layer.type)
+            if layer.type == "objectgroup" then
+                for _, control in ipairs(layer.controls) do
+                    Console:print(control.type)
+                    if control.type == "spawn_point" then
+                        return control.position
+                    end
+                end
+            end
+        end
+        return Vec2(0, 0)
     end
 
     self.update = function(self, dt)
