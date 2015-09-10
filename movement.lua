@@ -193,7 +193,7 @@ function create_movement(body, feet, propertiesObj)
         self.movement_time = 0
         self.movement_delay = self.properties.wall_stick_delay
         self.is_stuck_to_wall = true
-        self.wall_stick_timer = self.properties.wall_stick_delay
+        self.wall_stick_timer = self.properties.wall_slide_idle_time
     end
 
     self.on_wall_unstick = function(self)
@@ -351,15 +351,15 @@ function create_movement(body, feet, propertiesObj)
                             self:on_wall_unstick()
                         end
                     else
-                        self.wall_stick_timer = self.properties.wall_stick_delay
+                        self.wall_stick_timer = self.properties.wall_slide_idle_time
                     end
 
                     if self.against_wall == WALL_CONTACTS.cRight and self.input.x < 0 then
                         self.stop_wall_slide = true
-                        self.wall_stick_timer = self.properties.wall_stick_delay
+                        self.wall_stick_timer = self.properties.wall_slide_idle_time
                     elseif self.against_wall == WALL_CONTACTS.cLeft and self.input.x > 0 then
                         self.stop_wall_slide = true
-                        self.wall_stick_timer = self.properties.wall_stick_delay
+                        self.wall_stick_timer = self.properties.wall_slide_idle_time
                     else
                         self.stop_wall_slide = false
                     end
