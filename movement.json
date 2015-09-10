@@ -27,7 +27,7 @@
     "raycasts": {
         "ground": {
             "distance": 18,
-            "spread": 10
+            "spread": 14
         },
         "walls": {
             "distance": 16,
