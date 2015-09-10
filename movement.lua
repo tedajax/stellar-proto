@@ -46,6 +46,7 @@ function create_movement(body, feet, propertiesObj)
     self.is_stuck_to_wall = false
     self.stop_wall_slide = false
     self.wall_stick_timer = 0
+    self.wall_jump_requested_timer = 0
 
     self.ramp_angle = 0
 
@@ -328,6 +329,16 @@ function create_movement(body, feet, propertiesObj)
                             self:wall_hop(1)
                         end
                     end
+
+                    if self.wall_jump_requested_timer > 0 then
+                        self.wall_jump_requested_timer = self.wall_jump_requested_timer - dt
+                        if self.wall_jump_requested_timer <= 0 then
+                            self.wall_jump_requested_timer = 0
+                            self.jump_requested = false
+                        end
+                    else
+                        self.wall_jump_requested_timer = self.properties.wall_jump_request_window
+                    end
                 end
 
                 -- the wall stick timer allows for not pushing against the wall for a time so that wall jump commands
@@ -425,14 +436,14 @@ function create_movement(body, feet, propertiesObj)
             end
         end
 
-        -- Log:debug("Wall stick: "..tostring(self.is_stuck_to_wall))
-        -- Log:debug("Is on ground: "..tostring(self.is_on_ground))
-        -- Log:debug("Wall stick timer: "..tostring(self.wall_stick_timer))
-        -- Log:debug("Against wall: "..tostring(self.against_wall))
-        -- Log:debug("Pushging against: "..tostring(self.pushing_against_wall))
-        -- Log:debug("Input X: "..tostring(self.input.x))
-        -- Log:debug("move delay: "..tostring(self.movement_delay))
-        -- Log:debug("move time: "..tostring(self.movement_time))
+        Log:debug("Wall stick: "..tostring(self.is_stuck_to_wall))
+        Log:debug("Is on ground: "..tostring(self.is_on_ground))
+        Log:debug("Wall stick timer: "..tostring(self.wall_stick_timer))
+        Log:debug("Against wall: "..tostring(self.against_wall))
+        Log:debug("Pushging against: "..tostring(self.pushing_against_wall))
+        Log:debug("Input X: "..tostring(self.input.x))
+        Log:debug("move delay: "..tostring(self.movement_delay))
+        Log:debug("move time: "..tostring(self.movement_time))
 
         for k, v in pairs(self.input) do
             self.prev_input[k] = v
