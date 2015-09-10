@@ -270,7 +270,8 @@ function create_movement(body, feet, propertiesObj)
         if self.is_jumping then
             if self.input.jump then
                 local _, vy = self.body:getLinearVelocity()
-                if vy > 0 and not self.is_stuck_to_wall then
+                if not self.is_stuck_to_wall then
+                    Console:print("apply force")
                     self.body:applyForce(0, -self.properties.jump_hold_force)
                 end
             else

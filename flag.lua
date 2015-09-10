@@ -5,8 +5,8 @@ function create_flag()
     local self = {}
 
     self.position = Vec2(0, 0)
-    self.width = 16
-    self.height = 32
+    self.width = 32
+    self.height = 64
 
     self.controller = nil
 
@@ -15,9 +15,9 @@ function create_flag()
 
     self.shape = love.physics.newRectangleShape(
         0,
-        0,
+        self.width / 2,
         self.width,
-        self.height
+        self.height - self.width / 2
     )
 
     self.fixture = love.physics.newFixture(self.body, self.shape)
