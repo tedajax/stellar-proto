@@ -32,14 +32,15 @@ function create_bullet()
 
         self.body:setX(x)
         self.body:setY(y)
-        self.body:setActive(true)
         self.shape = love.physics.newCircleShape(
             0, 0,
             self.radius
         )
         self.fixture = love.physics.newFixture(self.body, self.shape)
         self.fixture:setUserData(self)
-        self.fixture:setFilterData(get_collision_filter("cPlayerBullet"))
+        self.fixture:setFilterData(unpack(get_collision_filter("cPlayerBullet")))
+
+        self.body:setActive(true)
 
         local radians = math.rad(angle)
         local velocity = Vec2(math.cos(radians), math.sin(radians))

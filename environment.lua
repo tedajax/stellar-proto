@@ -37,7 +37,7 @@ function create_wall()
                 self.width, self.height
             )
             self.fixture = love.physics.newFixture(self.body, self.shape)
-            self.fixture:setFilterData(get_collision_filter("cStaticEnvironment"))
+            self.fixture:setFilterData(unpack(get_collision_filter("cStaticEnvironment")))
         elseif properties.type == "ramp" then
             local first = properties.first
             local last = properties.last
@@ -58,9 +58,9 @@ function create_wall()
                 w / 2, -h / 2
             )
             self.fixture = love.physics.newFixture(self.body, self.shape)
-            self.fixture:setFilterData(get_collision_filter("cStaticEnvironment"))
+            self.fixture:setFilterData(unpack(get_collision_filter("cStaticEnvironment")))
             self.fixture:setUserData(self)
-            self.fixture:setFriction(0.5)
+            self.fixture:setFriction(0.1)
         end
     end
 
@@ -109,7 +109,7 @@ function create_platform()
             self.width, self.height
         )
         self.fixture = love.physics.newFixture(self.body, self.shape)
-        self.fixture:setFilterData(get_collision_filter("cEnvironment"))
+        self.fixture:setFilterData(unpack(get_collision_filter("cEnvironment")))
         self.fixture:setUserData(self)
 
         if controller ~= nil then

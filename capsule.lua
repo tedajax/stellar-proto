@@ -38,10 +38,10 @@ function create_capsule(world, radius, length, offset)
         self.feet_fixture:setFriction(friction)
     end
 
-    self.set_filter_data = function(self, category, mask, group)
-        self.core_fixture:setFilterData(category, mask, group)
-        self.head_fixture:setFilterData(category, mask, group)
-        self.feet_fixture:setFilterData(category, mask, group)
+    self.set_filter_data = function(self, filter)
+        self.core_fixture:setFilterData(unpack(filter))
+        self.head_fixture:setFilterData(unpack(filter))
+        self.feet_fixture:setFilterData(unpack(filter))
     end
 
     return self

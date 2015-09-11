@@ -15,7 +15,7 @@ function register_collision_filter(tag, category, mask, group)
 end
 
 register_collision_filter(COLLISION_TAGS.cDefault,              0x0000, 0x0000,  0)
-register_collision_filter(COLLISION_TAGS.cPlayer,               0x0001, 0x0018,  0)
+register_collision_filter(COLLISION_TAGS.cPlayer,               0x0001, 0x0018, -1)
 register_collision_filter(COLLISION_TAGS.cEnemy,                0x0002, 0x001D,  0)
 register_collision_filter(COLLISION_TAGS.cPlayerBullet,         0x0004, 0x0016, -1)
 register_collision_filter(COLLISION_TAGS.cEnvironment,          0x0008, 0xffff,  0)
@@ -24,7 +24,7 @@ register_collision_filter(COLLISION_TAGS.cFlag,                 0x0020, 0x0018, 
 
 function get_collision_filter(tag)
     local f = COLLISION_FILTERS[COLLISION_TAGS[tag]]
-    return f.category, f.mask, f.group
+    return { f.category, f.mask, f.group }
 end
 
 function collision_filter_test(c1, m1, g1, c2, m2, g2)
@@ -105,7 +105,7 @@ function create_collision()
                 hit.distance = fraction
                 hit.fixture = fixture
                 if mask then
-                    local category = fixture:getFilterData()
+                    local category, _, _ = fixture:getFilterData()
                     if bit.band(mask, category) > 0 then
                         table.insert(hit_list, hit)
                         return 0

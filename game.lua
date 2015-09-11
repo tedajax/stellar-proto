@@ -14,7 +14,7 @@ function create_game()
 
     self.collision = create_collision()
 
-    self.debug_collision = true
+    self.debug_collision = false
 
     self.init = function(self)
         self.player = create_player()

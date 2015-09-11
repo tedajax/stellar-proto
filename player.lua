@@ -94,6 +94,10 @@ function create_player_controller(player)
             self:fire()
         end
 
+        if Input:get_button_down("flag") then
+            
+        end
+
         self.movement:update(dt)
 
         self.actor.position.x = self.actor.collider.body:getX()
@@ -106,13 +110,17 @@ function create_player_controller(player)
     end
 
     self.fire = function(self)
-        local bx = self.actor.position.x
-        local by = self.actor.position.y
-        local radius = 8
+        local side_scalar = 1
         local angle = 0
         if self.facing == self.FACING_DIRECTIONS.cLeft then
             angle = 180
+            side_scalar = -1
         end
+
+        local radius = 8
+        local bx = self.actor.position.x --+ (self.actor.width / 2 + radius) * side_scalar
+        local by = self.actor.position.y
+
         local speed = 1500
         self.bullet_manager:add(bx, by, radius, angle, speed, BULLET_TAGS.cPlayer)
     end

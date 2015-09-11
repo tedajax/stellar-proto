@@ -43,8 +43,11 @@ function love.load()
     Input:add_button("jump")
     Input:create_button_binding("jump", "z")
 
+    Input:add_button("flag")
+    Input:create_button_binding("flag", "x'")
+
     Input:add_button("fire")
-    Input:create_button_binding("fire", "x")
+    -- Input:create_button_binding("fire", "x")
 
     Input:add_button("debug")
     Input:create_button_binding("debug", "g")
@@ -102,9 +105,9 @@ local function command_reload_movement(filename)
     local movementProps = json.load(filename)
     if movementProps ~= nil then
         Game.player_controller.movement:setProperties(movementProps)
-        Console:print("Reloaded movement properties from "..filename..".")
+        print("Reloaded movement properties from "..filename..".")
     else
-        Console:error("Unable to load movement properties from "..filename..".")
+        perror("Unable to load movement properties from "..filename..".")
     end
 end
 
@@ -114,56 +117,63 @@ local function command_set_font(p1, p2)
     elseif p2 ~= nil then
         Console:set_font({ filename = p1, ptsize = tonumber(p2) })
     else
-        Console:error("Unable to parse font parameters.")
+        perror("Unable to parse font parameters.")
     end
 end
 
 local function command_display_commands()
-    Console:print("-------------------------------------------------------------------------------------------------------------------------------")
-    Console:print("Comands are executed as the name of the command followed by whitespace delimited parameters (e.g.):")
-    Console:print("> help")
-    Console:print("> clear")
-    Console:print("> gravity 1000")
-    Console:print("> font assets/fonts/VeraMono.ttf 18")
-    Console:print("> font 12")
-    Console:print(" ")
-    Console:print("A list of available commands follows:")
+    print("-------------------------------------------------------------------------------------------------------------------------------")
+    print("Comands are executed as the name of the command followed by whitespace delimited parameters (e.g.):")
+    print("> help")
+    print("> clear")
+    print("> gravity 1000")
+    print("> font assets/fonts/VeraMono.ttf 18")
+    print("> font 12")
+    print(" ")
+    print("A list of available commands follows:")
     for k, v in pairs(Console.commands) do
         if k ~= "commands" then
             local s = k
             if v[2] ~= nil then
                 s = s.." "..v[2]
             end
-            Console:print(s)
+            print(s)
         end
     end
-    Console:print("-------------------------------------------------------------------------------------------------------------------------------")
+    print("-------------------------------------------------------------------------------------------------------------------------------")
 end
 
 local function command_display_help()
-    Console:print("-------------------------------------------------------------------------------------------------------------------------------")
-    Console:print("Arbitrary Lua can be executed within this console.")
-    Console:print("> print(\"hello, world\")")
-    Console:print("hello, world")
-    Console:print(" ")
-    Console:print("This is quite useful for debugging as you can also directly manipulate variables.")
-    Console:print("> myvar = 5")
-    Console:print("> print(myvar)")
-    Console:print("5")
-    Console:print(" ")
-    Console:print("For ease of use there are also commands available that don't require function call syntax.")
-    Console:print("For a list of available commands use the 'commands' command")
-    Console:print("> commands")
-    Console:print("...")
-    Console:print(" ")
-    Console:print("You can also cycle through history with the up/down arrow keys.")
-    Console:print("Using the <tab> key will cycle through autocomplete with varying degrees of success.")
-    Console:print("-------------------------------------------------------------------------------------------------------------------------------")
+    print("-------------------------------------------------------------------------------------------------------------------------------")
+    print("Arbitrary Lua can be executed within this console.")
+    print("> print(\"hello, world\")")
+    print("hello, world")
+    print(" ")
+    print("This is quite useful for debugging as you can also directly manipulate variables.")
+    print("> myvar = 5")
+    print("> print(myvar)")
+    print("5")
+    print(" ")
+    print("For ease of use there are also commands available that don't require function call syntax.")
+    print("For a list of available commands use the 'commands' command")
+    print("> commands")
+    print("...")
+    print(" ")
+    print("You can also cycle through history with the up/down arrow keys.")
+    print("Using the <tab> key will cycle through autocomplete with varying degrees of success.")
+    print("-------------------------------------------------------------------------------------------------------------------------------")
+end
+
+local function command_memory()
+    print("Memory in usage by Lua:")
+    local count = collectgarbage("count")
+    print(string.format("%.2fkb", count))
 end
 
 quit = love.event.quit
 exit = love.event.quit
 print = function(...) _print(...); Console:print(...) end
+perror = function(...) _print(...); Console:error(...) end
 help = command_display_help
 
 function console_register_commands(console)
@@ -178,5 +188,6 @@ function console_register_commands(console)
         font = { command_set_font, "<filename> ptsize -- Set console font.  Don't provide filename to just change size." },
         noclip = { function() Game:noclip() end, "noclip -- Toggle noclip mode." },
         coldbg = { function() Game.debug_collision = not Game.debug_collision end, "coldbg -- Toggle collision debug render." },
+        memory = { command_memory, "memory -- display memory usage information." },
     }
 end

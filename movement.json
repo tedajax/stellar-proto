@@ -7,7 +7,7 @@
         "stop_acceleration": 3000
     },
     "air": {
-        "acceleration": 5000,
+        "acceleration": 3000,
         "max_speed": 600,
         "max_speed_slow_rate": 50,
         "move_delay": 0,
@@ -17,7 +17,6 @@
     "jump_force": 1100,
     "jump_hold_force": 1200,
     "wall_slide_max_speed": 100,
-    "wall_gravity_modifier": 0.4,
     "wall_stick_delay": 0.5,
     "wall_slide_idle_time": 1.0,
     "wall_jump_request_window": 0.25,
@@ -27,7 +26,7 @@
     "raycasts": {
         "ground": {
             "distance": 4,
-            "spread": 26
+            "spread": 24
         },
         "walls": {
             "distance": 2,

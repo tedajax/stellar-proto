@@ -109,7 +109,6 @@ function create_movement(collider, propertiesObj)
                 angle_right = Vec2(0, -1):angle(hit.normal)
             end
             self.ramp_angle = math.max(angle_left, angle_right)
-            Log:debug("ramp angle: "..tostring(self.ramp_angle))
         else
             self.ramp_angle = 0
         end
@@ -142,11 +141,11 @@ function create_movement(collider, propertiesObj)
         local dist = self.collider.radius + self.properties.raycasts.walls.distance
         local spread = self.properties.raycasts.walls.spread / 2
 
-        local right_hits_top = self:raycast_relative(Vec2(dist, 0), Vec2(0, -spread))
-        local right_hits_bottom = self:raycast_relative(Vec2(dist, 0), Vec2(0, spread))
+        local right_hits_top = self:raycast_relative(Vec2(dist, 0), Vec2(0, -spread), collision_get_mask("cStaticEnvironment", "cEnvironment"))
+        local right_hits_bottom = self:raycast_relative(Vec2(dist, 0), Vec2(0, spread), collision_get_mask("cStaticEnvironment", "cEnvironment"))
 
-        local left_hits_top = self:raycast_relative(Vec2(-dist, 0), Vec2(0, -spread))
-        local left_hits_bottom = self:raycast_relative(Vec2(-dist, 0), Vec2(0, spread))
+        local left_hits_top = self:raycast_relative(Vec2(-dist, 0), Vec2(0, -spread), collision_get_mask("cStaticEnvironment", "cEnvironment"))
+        local left_hits_bottom = self:raycast_relative(Vec2(-dist, 0), Vec2(0, spread), collision_get_mask("cStaticEnvironment", "cEnvironment"))
 
         local on_right = #right_hits_top > 0 or #right_hits_bottom > 0
         local on_left = #left_hits_top > 0 or #left_hits_bottom > 0
@@ -216,7 +215,6 @@ function create_movement(collider, propertiesObj)
         self.is_stuck_to_wall = false
         self.wall_stick_timer = 0
         self.movement_delay = 0
-        self.body:setGravityScale(1.0)
         self.stop_wall_slide = false
     end
 
@@ -306,7 +304,7 @@ function create_movement(collider, propertiesObj)
         elseif preForceVx <= -max_speed and velocity.x < 0 then
             velocity.x = 0
         end
-        self.body:applyLinearImpulse(velocity.x, self.ramp_angle * -0.15)
+        self.body:applyLinearImpulse(velocity.x, self.ramp_angle * -0.15 * math.abs(self.input.x))
 
         -- Determine if the player is pushing against a wall
         if self.input.x > 0 and self.against_wall == WALL_CONTACTS.cRight then
@@ -324,11 +322,6 @@ function create_movement(collider, propertiesObj)
                 -- if at any time the player is no longer pushing into the wall we unstick
                 if self.against_wall == WALL_CONTACTS.cNone then
                     self:on_wall_unstick()
-                end
-
-                -- reduce gravity scale when wall sliding
-                if vy > 0 then
-                    self.body:setGravityScale(self.properties.wall_gravity_modifier)
                 end
 
                 -- here's where the wall jump action is
@@ -382,7 +375,6 @@ function create_movement(collider, propertiesObj)
                     end
                 end
             else
-                self.body:setGravityScale(1.0)
                 -- when the player is not on the ground and pushing against a wall we go into wall stick mode
                 if self.pushing_against_wall ~= WALL_CONTACTS.cNone then
                    self:on_wall_stick()
@@ -434,6 +426,13 @@ function create_movement(collider, propertiesObj)
             end
         end
 
+        if self.is_on_ground and lvy >= 0 or self.stop_wall_slide then
+            self.body:setGravityScale(0)
+            lvy = 0
+        else
+            self.body:setGravityScale(1)
+        end
+
         self.body:setLinearVelocity(
             lvx,
             lvy
@@ -443,9 +442,6 @@ function create_movement(collider, propertiesObj)
             local bx, by = self.body:getX(), self.body:getY()
             if self.on_moving_platform.controller ~= nil then
                 local mpv = self.on_moving_platform.controller.velocity
-                if Input:get_button("debug") then
-                    Log:debug("platform x,y: "..tostring(mpv.x)..", "..tostring(mpv.y))
-                end
                 bx = bx + mpv.x
                 by = by + mpv.y
                 self.body:setX(bx)
@@ -456,12 +452,9 @@ function create_movement(collider, propertiesObj)
         Log:debug("Wall stick: "..tostring(self.is_stuck_to_wall))
         Log:debug("Is on ground: "..tostring(self.is_on_ground))
         Log:debug("Wall stick timer: "..tostring(self.wall_stick_timer))
-        Log:debug("Against wall: "..tostring(self.against_wall))
-        Log:debug("Pushging against: "..tostring(self.pushing_against_wall))
         Log:debug("Input X: "..tostring(self.input.x))
         Log:debug("move delay: "..tostring(self.movement_delay))
         Log:debug("move time: "..tostring(self.movement_time))
-        Log:debug("on moving platform: "..tostring(self.on_moving_platform ~= nil))
 
         for k, v in pairs(self.input) do
             self.prev_input[k] = v

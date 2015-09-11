@@ -9,5 +9,5 @@ function love.conf(t)
     t.window.display = 1
     t.window.title = "Stellar"
 
-    t.window.vsync = false
+    t.window.vsync = true
 end

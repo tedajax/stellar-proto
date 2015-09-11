@@ -25,8 +25,8 @@
                     {
                      "controller":"tween_position",
                      "endpoint_offset_x":"0",
-                     "endpoint_offset_y":"672",
-                     "tween_dest":"1",
+                     "endpoint_offset_y":"15",
+                     "tween_dest":"32",
                      "tween_duration":"10",
                      "tween_function":"tri_wave",
                      "tween_start":"0"
