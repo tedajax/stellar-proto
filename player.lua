@@ -95,7 +95,7 @@ function create_player_controller(player)
         end
 
         if Input:get_button_down("flag") then
-            
+
         end
 
         self.movement:update(dt)
@@ -141,6 +141,7 @@ function create_player_noclip_controller(player)
 
     self.on_unposess = function(self)
         self.actor.collider.body:setActive(true)
+        self.actor.collider.body:setLinearVelocity(0, 0)
     end
 
     self.on_update = function(self, dt)

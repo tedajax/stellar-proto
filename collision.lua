@@ -99,6 +99,9 @@ function create_collision()
             startpoint.x, startpoint.y,
             endpoint.x, endpoint.y,
             function(fixture, x, y, xn, yn, fraction)
+                if fixture:isSensor() then
+                    return 1
+                end
                 local hit = {}
                 hit.position = Vec2(x, y)
                 hit.normal = Vec2(xn, yn)
@@ -128,85 +131,11 @@ function create_collision()
         self.world:update(dt)
     end
 
-    self.debug_render = function(self, show_aabb)
+    self.debug_render = function(self)
         local bodies = self.world:getBodyList()
         for _, b in pairs(bodies) do
             if b:isActive() then
-                local fixtures = b:getFixtureList()
-                for _, f in pairs(fixtures) do
-                    local shape = f:getShape()
-
-                    love.graphics.setColor(255, 0, 255)
-
-                    local bx = b:getX()
-                    local by = b:getY()
-
-                    if shape:getType() == "circle" then
-                        local r = shape:getRadius()
-                        local cx, cy = shape:getPoint()
-                        love.graphics.circle("line", cx + bx, cy + by, r)
-                    elseif shape:getType() == "polygon" then
-                        love.graphics.push()
-                        love.graphics.translate(bx, by)
-                        love.graphics.rotate(b:getAngle())
-                        local points = { shape:getPoints() }
-                        for i = 1, #points - 2, 2 do
-                            love.graphics.line(
-                                points[i],
-                                points[i + 1],
-                                points[i + 2],
-                                points[i + 3]
-                            )
-                        end
-
-                        love.graphics.line(
-                            points[1],
-                            points[2],
-                            points[#points - 1],
-                            points[#points]
-                        )
-                        love.graphics.pop()
-                    elseif shape:getType() == "edge" then
-                        love.graphics.push()
-                        love.graphics.translate(bx, by)
-                        love.graphics.rotate(b:getAngle())
-                        local points = { shape:getPoints() }
-                        for i = 1, #points - 2, 2 do
-                            love.graphics.line(
-                                points[i],
-                                points[i + 1],
-                                points[i + 2],
-                                points[i + 3]
-                            )
-                        end
-
-                        love.graphics.line(
-                            points[1],
-                            points[2],
-                            points[#points - 1],
-                            points[#points]
-                        )
-
-                        love.graphics.setColor(0, 255, 0)
-                        for i = 1, #points, 2 do
-                            love.graphics.circle("fill", points[i], points[i + 1], 4)
-                        end
-
-                        love.graphics.pop()
-                    end
-
-                    if show_aabb then
-                        local tx, ty, bx, by = shape:computeAABB(bx, by, b:getAngle())
-                        love.graphics.setColor(255, 255, 0)
-                        love.graphics.rectangle(
-                            "line",
-                            tx,
-                            ty,
-                            bx - tx,
-                            by - ty
-                        )
-                    end
-                end
+                self:draw_body(b)
             end
         end
 
@@ -219,6 +148,69 @@ function create_collision()
         end
 
         self.frame_ray_casts = {}
+    end
+
+    self.draw_body = function(self, body)
+        local fixtures = body:getFixtureList()
+        for _, f in pairs(fixtures) do
+            local shape = f:getShape()
+
+            local bx = body:getX()
+            local by = body:getY()
+
+            if shape:getType() == "circle" then
+                local r = shape:getRadius()
+                local cx, cy = shape:getPoint()
+                love.graphics.circle("line", cx + bx, cy + by, r)
+            elseif shape:getType() == "polygon" then
+                love.graphics.push()
+                love.graphics.translate(bx, by)
+                love.graphics.rotate(body:getAngle())
+                local points = { shape:getPoints() }
+                for i = 1, #points - 2, 2 do
+                    love.graphics.line(
+                        points[i],
+                        points[i + 1],
+                        points[i + 2],
+                        points[i + 3]
+                    )
+                end
+
+                love.graphics.line(
+                    points[1],
+                    points[2],
+                    points[#points - 1],
+                    points[#points]
+                )
+                love.graphics.pop()
+            elseif shape:getType() == "edge" then
+                love.graphics.push()
+                love.graphics.translate(bx, by)
+                love.graphics.rotate(body:getAngle())
+                local points = { shape:getPoints() }
+                for i = 1, #points - 2, 2 do
+                    love.graphics.line(
+                        points[i],
+                        points[i + 1],
+                        points[i + 2],
+                        points[i + 3]
+                    )
+                end
+
+                love.graphics.line(
+                    points[1],
+                    points[2],
+                    points[#points - 1],
+                    points[#points]
+                )
+
+                for i = 1, #points, 2 do
+                    love.graphics.circle("fill", points[i], points[i + 1], 4)
+                end
+
+                love.graphics.pop()
+            end
+        end
     end
 
     return self

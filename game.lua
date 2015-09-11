@@ -8,6 +8,7 @@ require 'tilemap'
 require 'bullet'
 require 'environment'
 require 'level'
+require 'trigger'
 
 function create_game()
     local self = {}
@@ -39,6 +40,9 @@ function create_game()
         self.bullet_manager = create_bullet_manager(100)
         self.player_controller.bullet_manager = self.bullet_manager
 
+        self.trigger_manager = create_trigger_manager(100)
+        self.trigger_manager:add(1168, 1074, love.physics.newRectangleShape(0, 0, 92, 92), "cStaticEnvironment")
+
         for i = 1, 10 do
             -- self.npc_manager:add(math.random(-300, 300), math.random(-150, 150))
         end
@@ -63,8 +67,10 @@ function create_game()
         self.npc_manager:render()
         self.level:render()
         if self.debug_collision then
+            love.graphics.setColor(255, 0, 255)
             self.collision:debug_render(false)
         end
+        self.trigger_manager:render()
         Camera:pop()
 
         -- love.graphics.setColor(0, 255, 0)

@@ -170,6 +170,14 @@ local function command_memory()
     print(string.format("%.2fkb", count))
 end
 
+local function command_gotoxy(x, y)
+    Game.player:set_position(Vec2(x, y))
+end
+
+local function command_getxy()
+    print("Position:", tostring(Game.player.position.x)..", "..tostring(Game.player.position.y))
+end
+
 quit = love.event.quit
 exit = love.event.quit
 print = function(...) _print(...); Console:print(...) end
@@ -178,16 +186,18 @@ help = command_display_help
 
 function console_register_commands(console)
     console.commands = {
-        help = { command_display_help, "-- Display help message." },
-        commands = { command_display_commands, "-- Displays a list of commands." },
-        quit = { love.event.quit, "-- Quit game.." },
-        exit = { love.event.quit, "-- Exit game." },
-        clear = { function() Console:clear() end, "-- Clear the console." },
-        gravity = { command_set_gravity, "number -- Sets gravity to number." },
-        movement = { command_reload_movement, "<filename> -- Reload player movement properties." },
-        font = { command_set_font, "<filename> ptsize -- Set console font.  Don't provide filename to just change size." },
-        noclip = { function() Game:noclip() end, "noclip -- Toggle noclip mode." },
-        coldbg = { function() Game.debug_collision = not Game.debug_collision end, "coldbg -- Toggle collision debug render." },
-        memory = { command_memory, "memory -- display memory usage information." },
+        help        = { command_display_help, "-- Display help message." },
+        commands    = { command_display_commands, "-- Displays a list of commands." },
+        quit        = { love.event.quit, "-- Quit game.." },
+        exit        = { love.event.quit, "-- Exit game." },
+        clear       = { function() Console:clear() end, "-- Clear the console." },
+        gravity     = { command_set_gravity, "number -- Sets gravity to number." },
+        movement    = { command_reload_movement, "<filename> -- Reload player movement properties." },
+        font        = { command_set_font, "<filename> ptsize -- Set console font.  Don't provide filename to just change size." },
+        noclip      = { function() Game:noclip() end, "noclip -- Toggle noclip mode." },
+        coldbg      = { function() Game.debug_collision = not Game.debug_collision end, "coldbg -- Toggle collision debug render." },
+        memory      = { command_memory, "memory -- display memory usage information." },
+        gotoxy      = { command_gotoxy, "gotoxy <x> <y> -- put player at position." },
+        getxy       = { command_getxy, "gotoxy <x> <y> -- put player at position." },
     }
 end
