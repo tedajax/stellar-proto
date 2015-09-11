@@ -18,8 +18,8 @@ register_collision_filter(COLLISION_TAGS.cDefault,              0x0000, 0x0000, 
 register_collision_filter(COLLISION_TAGS.cPlayer,               0x0001, 0x0018, -1)
 register_collision_filter(COLLISION_TAGS.cEnemy,                0x0002, 0x001D,  0)
 register_collision_filter(COLLISION_TAGS.cPlayerBullet,         0x0004, 0x0016, -1)
-register_collision_filter(COLLISION_TAGS.cEnvironment,          0x0008, 0xffff,  0)
-register_collision_filter(COLLISION_TAGS.cStaticEnvironment,    0x0010, 0xffff,  0)
+register_collision_filter(COLLISION_TAGS.cEnvironment,          0x0008, 0x0027,  0)
+register_collision_filter(COLLISION_TAGS.cStaticEnvironment,    0x0010, 0x0027,  0)
 register_collision_filter(COLLISION_TAGS.cFlag,                 0x0020, 0x0018,  0)
 
 function get_collision_filter(tag)
@@ -48,11 +48,11 @@ function collision_get_mask(...)
     return mask
 end
 
-function fixture_call(fixture, func, other, coll)
+function fixture_call(fixture, func, ...)
     local obj = fixture:getUserData()
     if type(obj) == "table" then
         if type(obj[func]) == "function" then
-            obj[func](obj, other, coll)
+            obj[func](obj, ...)
         end
     end
 end

@@ -10,10 +10,15 @@ function create_trigger()
 
     self.position = Vec2(0, 0)
 
-    self.body = love.physics.newBody(Game.collision.world, 0, 0, "static")
+    self.body = love.physics.newBody(Game.collision.world, 0, 0, "dynamic")
     self.body:setActive(false)
+    self.body:setGravityScale(0)
     self.shape = nil
     self.fixture = nil
+
+    self.attached_actor = nil
+
+    self.subscribers = {}
 
     -- will be pretty fragile should switch to keeping track of what objects are inside
     self.count = 0
@@ -38,6 +43,43 @@ function create_trigger()
         if self.fixture ~= nil then self.fixture:destroy() end
     end
 
+    self.attach = function(self, actor)
+        assert(self.attached_actor == nil)
+        self.attached_actor = actor
+    end
+
+    self.detach = function(self, actor)
+        self.attached_actor = nil
+    end
+
+    self.subscribe = function(self, sub)
+        -- todo: handle multiple subscriptions from same source gracefully
+        table.insert(self.subscribers, sub)
+    end
+
+    self.unsubscribe = function(self, sub)
+        for i = #self.subscribers, 1, -1 do
+            if self.subscribers[i] == sub then
+                table.remove(self.subscribers, i)
+                -- todo: if we disallow duplication we can early terminate here
+            end
+        end
+    end
+
+    self.notify = function(self, msg, ...)
+        for _, sub in ipairs(self.subscribers) do
+            if type(sub[msg]) == "function" then
+                sub[msg](self, ...)
+            end
+        end
+    end
+
+    self.update = function(self, dt)
+        if self.attached_actor ~= nil then
+            self.body:setPosition(self.attached_actor.position.x, self.attached_actor.position.y)
+        end
+    end
+
     self.render = function(self)
         if self.count <= 0 then
             love.graphics.setColor(0, 255, 0)
@@ -49,13 +91,21 @@ function create_trigger()
     end
 
     self.on_collision_begin = function(self, other, coll)
-        -- do triggery things
+        if self.count == 0 then
+            self:notify("on_trigger_activated")
+        end
         self.count = self.count + 1
+
+        fixture_call(other, "on_trigger_enter")
     end
 
     self.on_collision_end = function(self, other, coll)
-        -- do triggery things
         self.count = self.count - 1
+        if self.count == 0 then
+            self:notify("on_trigger_deactivated")
+        end
+
+        fixture_call(other, "on_trigger_exit")
     end
 
     return self
@@ -76,6 +126,7 @@ function create_trigger_manager(capacity)
 
     self.update = function(self, dt)
         self.pool:remove_flagged()
+        self.pool:execute_obj_func("update", dt)
     end
 
     self.render = function(self, dt)

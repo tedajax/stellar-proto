@@ -19,6 +19,8 @@ function create_wall()
     self.shape = nil
     self.fixture = nil
 
+    self.asdf = "imawall"
+
     self.activate = function(self, properties)
         if properties.type == "normal" then
             local l, r, t, b = properties.l, properties.r, properties.t, properties.b
