@@ -41,6 +41,7 @@ function create_movement(body, feet, propertiesObj)
     self.on_moving_platform = nil
     self.is_jumping = false
     self.used_jumps = 0
+    self.jump_hold_multiplier = 1
     self.against_wall = WALL_CONTACTS.cNone
     self.pushing_against_wall = WALL_CONTACTS.cNone
     self.is_stuck_to_wall = false
@@ -204,6 +205,7 @@ function create_movement(body, feet, propertiesObj)
 
     self.on_land_ground = function(self)
         self.used_jumps = 0
+        self.jump_hold_multiplier = 1
         self.jump_requested = false
     end
 
@@ -229,6 +231,7 @@ function create_movement(body, feet, propertiesObj)
         self.body:applyLinearImpulse(0, -self.properties.jump_force)
         self.used_jumps = self.used_jumps + 1
         self.jump_requested = false
+        self.jump_hold_multiplier = 1
     end
 
     self.wall_jump_base = function(self, fx, fy)
@@ -240,6 +243,7 @@ function create_movement(body, feet, propertiesObj)
         self.body:setLinearVelocity(0, vy)
         self.body:applyLinearImpulse(fx, fy)
         self.jump_requested = false
+        self.jump_hold_multiplier = 0.5
     end
 
     self.wall_jump = function(self, scalar)
@@ -269,10 +273,8 @@ function create_movement(body, feet, propertiesObj)
         -- allow for holding the jump button to float a bit more
         if self.is_jumping then
             if self.input.jump then
-                local _, vy = self.body:getLinearVelocity()
                 if not self.is_stuck_to_wall then
-                    Console:print("apply force")
-                    self.body:applyForce(0, -self.properties.jump_hold_force)
+                    self.body:applyForce(0, -self.properties.jump_hold_force * self.jump_hold_multiplier)
                 end
             else
                 self.is_jumping = false
