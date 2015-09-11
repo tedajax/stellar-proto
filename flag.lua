@@ -7,7 +7,7 @@ function create_flag()
 
     self.position = Vec2(0, 0)
     self.width = 32
-    self.height = 30
+    self.height = 40
 
     self.controller = nil
 
@@ -41,8 +41,8 @@ function create_flag()
         love.graphics.polygon(
             "fill",
             pole_x, self.position.y - self.height / 2,
-            self.position.x + self.width / 2, self.position.y - self.height / 2 + 5,
-            pole_x, self.position.y - self.height / 2 + 10
+            self.position.x + self.width / 2 + 10, self.position.y - self.height / 2 + 10,
+            pole_x, self.position.y - self.height / 2 + 20
         )
     end
 
