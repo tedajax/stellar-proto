@@ -8,15 +8,11 @@ WALL_CONTACTS = {
     cRight = 2,
 }
 
-function create_movement(body, feet, propertiesObj)
+function create_movement(collider, propertiesObj)
     local self = {}
 
-    self.body = body
-
-    -- feet is the shape connected to the body that will be used for
-    -- determining what's landed on.
-    -- This is expected to be a CircleShape
-    self.feet = feet
+    self.collider = collider
+    self.body = collider.body
 
     -- movement properties
     self.properties = propertiesObj
@@ -79,8 +75,8 @@ function create_movement(body, feet, propertiesObj)
     self.check_on_ground = function(self)
         local dist = self.properties.raycasts.ground.distance
         local spread = self.properties.raycasts.ground.spread / 2
-        local hits_left = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(-spread, 0), collision_get_mask("cStaticEnvironment", "cEnvironment"))
-        local hits_right = self:raycast_relative(Vec2(0, dist), Vec2(self.feet.shape:getPoint()) + Vec2(spread, 0), collision_get_mask("cStaticEnvironment", "cEnvironment"))
+        local hits_left = self:raycast_relative(Vec2(0, dist), Vec2(self.collider.feet_shape:getPoint()) + Vec2(-spread, 0), collision_get_mask("cStaticEnvironment", "cEnvironment"))
+        local hits_right = self:raycast_relative(Vec2(0, dist), Vec2(self.collider.feet_shape:getPoint()) + Vec2(spread, 0), collision_get_mask("cStaticEnvironment", "cEnvironment"))
 
         local prev_on_ground = self.is_on_ground
 

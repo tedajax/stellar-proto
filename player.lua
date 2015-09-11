@@ -3,6 +3,7 @@ local json = require 'json'
 require 'movement'
 require 'bullet'
 require 'controller'
+require 'capsule'
 
 function create_player()
     local self = {}
@@ -13,32 +14,13 @@ function create_player()
 
     self.controller = nil
 
-    self.body = love.physics.newBody(Game.collision.world, 0, 0, "dynamic")
-    self.body:setFixedRotation(true)
-    self.body:setLinearDamping(0.1)
+    local len = self.height - self.width
+    self.collider = create_capsule(Game.collision.world, self.width / 2, len)
+    self.collider.body:setFixedRotation(true)
+    self.collider.body:setLinearDamping(0.1)
+    self.collider:set_filter_data(get_collision_filter("cPlayer"))
 
-    self.shape = love.physics.newRectangleShape(
-        0,
-        0,
-        self.width,
-        self.height - self.width / 2
-    )
-    self.fixture = love.physics.newFixture(self.body, self.shape)
-    self.fixture:setFriction(0)
-    self.fixture:setFilterData(get_collision_filter("cPlayer"))
-
-    self.foot_shape = love.physics.newCircleShape(
-        0,
-        self.height / 2 - self.width / 4,
-        self.width / 2 + 2
-    )
-    self.foot_fixture = love.physics.newFixture(self.body, self.foot_shape)
-    self.foot_fixture:setFilterData(get_collision_filter("cPlayer"))
-
-    -- self.fixture:setUserData(self)
-    self.foot_fixture:setUserData(self)
-
-    self.body:setMass(1)
+    self.collider.body:setMass(1)
 
     self.on_collision_begin = function(self, other, coll)
     end
@@ -49,8 +31,8 @@ function create_player()
     self.set_position = function(self, pos)
         self.position.x = pos.x
         self.position.y = pos.y
-        self.body:setX(self.position.x)
-        self.body:setY(self.position.y)
+        self.collider.body:setX(self.position.x)
+        self.collider.body:setY(self.position.y)
     end
 
     self.update = function(self, dt)
@@ -86,8 +68,7 @@ function create_player_controller(player)
     self.initialize = function(self)
         local movementProps = json.load(Defaults.game.movement_props)
         self.movement = create_movement(
-            self.actor.body,
-            { shape = self.actor.foot_shape, fixture = self.actor.foot_fixture },
+            self.actor.collider,
             movementProps
         )
     end
@@ -115,8 +96,8 @@ function create_player_controller(player)
 
         self.movement:update(dt)
 
-        self.actor.position.x = self.actor.body:getX()
-        self.actor.position.y = self.actor.body:getY()
+        self.actor.position.x = self.actor.collider.body:getX()
+        self.actor.position.y = self.actor.collider.body:getY()
 
         -- for _, npc in ipairs(self.selected) do
         --     npc.velocity.x = h
