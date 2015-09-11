@@ -73,7 +73,7 @@ function create_movement(collider, propertiesObj)
     end
 
     self.check_on_ground = function(self)
-        local dist = self.properties.raycasts.ground.distance
+        local dist = self.collider.radius + self.properties.raycasts.ground.distance
         local spread = self.properties.raycasts.ground.spread / 2
         local hits_left = self:raycast_relative(Vec2(0, dist), Vec2(self.collider.feet_shape:getPoint()) + Vec2(-spread, 0), collision_get_mask("cStaticEnvironment", "cEnvironment"))
         local hits_right = self:raycast_relative(Vec2(0, dist), Vec2(self.collider.feet_shape:getPoint()) + Vec2(spread, 0), collision_get_mask("cStaticEnvironment", "cEnvironment"))
@@ -139,7 +139,7 @@ function create_movement(collider, propertiesObj)
             return
         end
 
-        local dist = self.properties.raycasts.walls.distance
+        local dist = self.collider.radius + self.properties.raycasts.walls.distance
         local spread = self.properties.raycasts.walls.spread / 2
 
         local right_hits_top = self:raycast_relative(Vec2(dist, 0), Vec2(0, -spread))

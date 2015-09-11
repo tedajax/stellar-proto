@@ -4,11 +4,14 @@ function create_capsule(world, radius, length, offset)
     length = length or radius * 2
     offset = offset or { x = 0, y = 0 }
 
+    self.radius = radius
+    self.length = length
+
     self.body = love.physics.newBody(world, 0, 0, "dynamic")
 
     self.core_shape = love.physics.newRectangleShape(
         offset.x, offset.y,
-        radius * 2, length
+        radius * 2 - 2, math.max(length, 1)
     )
 
     self.core_fixture = love.physics.newFixture(self.body, self.core_shape)

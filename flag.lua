@@ -1,43 +1,25 @@
 local Vec2 = require 'vec2'
 require 'controller'
+require 'capsule'
 
 function create_flag()
     local self = {}
 
     self.position = Vec2(0, 0)
     self.width = 32
-    self.height = 64
+    self.height = 30
 
     self.controller = nil
 
-    self.body = love.physics.newBody(Game.collision.world, 0, 0, "dynamic")
-    self.body:setFixedRotation(true)
-
-    self.shape = love.physics.newRectangleShape(
-        0,
-        self.width / 2,
-        self.width,
-        self.height - self.width / 2
-    )
-
-    self.fixture = love.physics.newFixture(self.body, self.shape)
-    self.fixture:setFriction(0)
-    self.fixture:setFilterData(get_collision_filter("cFlag"))
-
-    self.base_shape = love.physics.newCircleShape(
-        0,
-        self.height / 2,
-        self.width / 2
-    )
-    self.base_fixture = love.physics.newFixture(self.body, self.base_shape)
-    self.base_fixture:setFilterData(get_collision_filter("cFlag"))
-
-    self.body:setMass(1)
+    self.collider = create_capsule(Game.collision.world, self.width / 2, self.height - self.width)
+    self.collider.body:setFixedRotation(true)
+    self.collider:set_filter_data(get_collision_filter("cFlag"))
+    self.collider.body:setMass(1)
 
     self.set_position = function(self, pos)
         self.position.x = pos.x
         self.position.y = pos.y
-        self.body:setPosition(pos.x, pos.y)
+        self.collider.body:setPosition(pos.x, pos.y)
     end
 
     self.update = function(self, dt)
@@ -71,8 +53,8 @@ function create_flag_controller(flag)
     local self = create_controller(flag)
 
     self.on_update = function(self, dt)
-        self.actor.position.x = self.actor.body:getX()
-        self.actor.position.y = self.actor.body:getY()
+        self.actor.position.x = self.actor.collider.body:getX()
+        self.actor.position.y = self.actor.collider.body:getY()
     end
 
     self.set_position = function(self, position)

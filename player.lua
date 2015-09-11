@@ -9,8 +9,8 @@ function create_player()
     local self = {}
 
     self.position = Vec2(0, 0)
-    self.width = 16
-    self.height = 32
+    self.width = 24
+    self.height = 50
 
     self.controller = nil
 
@@ -128,11 +128,11 @@ function create_player_noclip_controller(player)
     local self = create_controller(player)
 
     self.on_posess = function(self)
-        self.actor.body:setActive(false)
+        self.actor.collider.body:setActive(false)
     end
 
     self.on_unposess = function(self)
-        self.actor.body:setActive(true)
+        self.actor.collider.body:setActive(true)
     end
 
     self.on_update = function(self, dt)
@@ -142,7 +142,7 @@ function create_player_noclip_controller(player)
         self.actor.position.x = self.actor.position.x + 800 * h * dt
         self.actor.position.y = self.actor.position.y + 800 * v * dt
 
-        self.actor.body:setPosition(self.actor.position.x, self.actor.position.y)
+        self.actor.collider.body:setPosition(self.actor.position.x, self.actor.position.y)
     end
 
     return self
