@@ -7,6 +7,9 @@
             "gravity": 4000
         }
     },
+    "debug": {
+        "noclip_speed": 800
+    },
     "console_font": {
         "filename": "assets/fonts/VeraMono.ttf",
         "ptsize": 14

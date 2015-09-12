@@ -25,6 +25,18 @@ function create_flag()
         self.collider.body:setPosition(pos.x, pos.y)
     end
 
+    self.on_actor_enter = function(self, sender, actor)
+        if actor == nil then return end
+        actor.flag = self
+    end
+
+    self.on_actor_exit = function(self, sender, actor)
+        if actor == nil then return end
+        if actor.flag == self then
+            actor.flag = nil
+        end
+    end
+
     self.update = function(self, dt)
         if self.controller ~= nil then
             self.controller:update(dt)

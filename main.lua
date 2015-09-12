@@ -44,7 +44,7 @@ function love.load()
     Input:create_button_binding("jump", "z")
 
     Input:add_button("flag")
-    Input:create_button_binding("flag", "x'")
+    Input:create_button_binding("flag", "x")
 
     Input:add_button("fire")
     -- Input:create_button_binding("fire", "x")

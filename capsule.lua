@@ -44,5 +44,11 @@ function create_capsule(world, radius, length, offset)
         self.feet_fixture:setFilterData(unpack(filter))
     end
 
+    self.set_user_data = function(self, data)
+        self.core_fixture:setUserData(data)
+        self.head_fixture:setUserData(data)
+        self.feet_fixture:setUserData(data)
+    end
+
     return self
 end

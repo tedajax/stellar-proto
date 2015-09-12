@@ -19,6 +19,7 @@ function create_player()
     self.collider.body:setFixedRotation(true)
     self.collider.body:setLinearDamping(0.1)
     self.collider:set_filter_data(get_collision_filter("cPlayer"))
+    self.collider:set_user_data(self)
 
     self.collider.body:setMass(1)
 
@@ -99,7 +100,9 @@ function create_player_controller(player)
         end
 
         if Input:get_button_down("flag") then
-
+            if self.actor.flag then
+                self.actor.flag.collider.body:applyLinearImpulse(0, -1000)
+            end
         end
 
         self.movement:update(dt)
@@ -152,8 +155,8 @@ function create_player_noclip_controller(player)
         local h = Input:get_axis("horizontal")
         local v = Input:get_axis("vertical")
 
-        self.actor.position.x = self.actor.position.x + 800 * h * dt
-        self.actor.position.y = self.actor.position.y + 800 * v * dt
+        self.actor.position.x = self.actor.position.x + Defaults.debug.noclip_speed * h * dt
+        self.actor.position.y = self.actor.position.y + Defaults.debug.noclip_speed * v * dt
 
         self.actor.collider.body:setPosition(self.actor.position.x, self.actor.position.y)
     end
