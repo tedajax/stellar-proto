@@ -5,7 +5,8 @@ COLLISION_TAGS = {
     cPlayerBullet = 3,
     cEnvironment = 4,
     cStaticEnvironment = 5,
-    cFlag = 6
+    cFlag = 6,
+    cFlagTrigger = 7
 }
 
 COLLISION_FILTERS = {}
@@ -15,12 +16,13 @@ function register_collision_filter(tag, category, mask, group)
 end
 
 register_collision_filter(COLLISION_TAGS.cDefault,              0x0000, 0x0000,  0)
-register_collision_filter(COLLISION_TAGS.cPlayer,               0x0001, 0x0018, -1)
+register_collision_filter(COLLISION_TAGS.cPlayer,               0x0001, 0x005A, -1)
 register_collision_filter(COLLISION_TAGS.cEnemy,                0x0002, 0x001D,  0)
 register_collision_filter(COLLISION_TAGS.cPlayerBullet,         0x0004, 0x0016, -1)
 register_collision_filter(COLLISION_TAGS.cEnvironment,          0x0008, 0x0027,  0)
 register_collision_filter(COLLISION_TAGS.cStaticEnvironment,    0x0010, 0x0027,  0)
-register_collision_filter(COLLISION_TAGS.cFlag,                 0x0020, 0x0018,  0)
+register_collision_filter(COLLISION_TAGS.cFlag,                 0x0020, 0x0018, -2)
+register_collision_filter(COLLISION_TAGS.cFlagTrigger,          0x0040, 0x0001, -2)
 
 function get_collision_filter(tag)
     local f = COLLISION_FILTERS[COLLISION_TAGS[tag]]
@@ -158,14 +160,15 @@ function create_collision()
             local bx = body:getX()
             local by = body:getY()
 
+            love.graphics.push()
+            love.graphics.translate(bx, by)
+            love.graphics.rotate(body:getAngle())
+
             if shape:getType() == "circle" then
                 local r = shape:getRadius()
                 local cx, cy = shape:getPoint()
-                love.graphics.circle("line", cx + bx, cy + by, r)
+                love.graphics.circle("line", cx, cy, r)
             elseif shape:getType() == "polygon" then
-                love.graphics.push()
-                love.graphics.translate(bx, by)
-                love.graphics.rotate(body:getAngle())
                 local points = { shape:getPoints() }
                 for i = 1, #points - 2, 2 do
                     love.graphics.line(
@@ -182,11 +185,7 @@ function create_collision()
                     points[#points - 1],
                     points[#points]
                 )
-                love.graphics.pop()
             elseif shape:getType() == "edge" then
-                love.graphics.push()
-                love.graphics.translate(bx, by)
-                love.graphics.rotate(body:getAngle())
                 local points = { shape:getPoints() }
                 for i = 1, #points - 2, 2 do
                     love.graphics.line(
@@ -208,8 +207,31 @@ function create_collision()
                     love.graphics.circle("fill", points[i], points[i + 1], 4)
                 end
 
-                love.graphics.pop()
+            elseif shape:getType() == "chain" then
+                local points = { shape:getPoints() }
+                for i = 1, #points - 2, 2 do
+                    love.graphics.line(
+                        points[i],
+                        points[i + 1],
+                        points[i + 2],
+                        points[i + 3]
+                    )
+                end
+
+
+                love.graphics.line(
+                    points[1],
+                    points[2],
+                    points[#points - 1],
+                    points[#points]
+                )
+
+                for i = 1, #points, 2 do
+                    love.graphics.circle("fill", points[i], points[i + 1], 4)
+                end
             end
+
+            love.graphics.pop()
         end
     end
 

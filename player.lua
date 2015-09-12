@@ -28,6 +28,10 @@ function create_player()
     self.on_collision_end = function(self, other, coll)
     end
 
+    self.on_trigger_enter = function(self, sender)
+
+    end
+
     self.set_position = function(self, pos)
         self.position.x = pos.x
         self.position.y = pos.y

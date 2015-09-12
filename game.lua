@@ -15,9 +15,13 @@ function create_game()
 
     self.collision = create_collision()
 
-    self.debug_collision = false
+    self.debug_collision = true
 
     self.init = function(self)
+        self.trigger_manager = create_trigger_manager(100)
+        self.npc_manager = create_npc_manager(100)
+        self.bullet_manager = create_bullet_manager(100)
+
         self.player = create_player()
         self.player_controller = create_player_controller(self.player)
         self.player_controller:initialize()
@@ -29,18 +33,14 @@ function create_game()
 
         Camera:set_target(self.player.position)
 
-        self.npc_manager = create_npc_manager(100)
-
         self.level = create_level("assets/map1.json")
 
         local spawn_pos = self.level:get_spawn_position()
         self.player:set_position(spawn_pos)
         self.flag:set_position(spawn_pos)
 
-        self.bullet_manager = create_bullet_manager(100)
         self.player_controller.bullet_manager = self.bullet_manager
 
-        self.trigger_manager = create_trigger_manager(100)
         self.trigger_manager:add(1168, 1074, love.physics.newRectangleShape(0, 0, 92, 92), "cStaticEnvironment")
 
         for i = 1, 10 do

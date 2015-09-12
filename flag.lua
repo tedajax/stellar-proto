@@ -16,6 +16,9 @@ function create_flag()
     self.collider:set_filter_data(get_collision_filter("cFlag"))
     self.collider.body:setMass(1)
 
+    self.flag_trigger = Game.trigger_manager:add(0, 0, love.physics.newCircleShape(0, 0, 32), "cFlagTrigger")
+    self.flag_trigger:attach(self)
+
     self.set_position = function(self, pos)
         self.position.x = pos.x
         self.position.y = pos.y

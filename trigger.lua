@@ -52,6 +52,14 @@ function create_trigger()
         self.attached_actor = nil
     end
 
+    self.attached_call = function(self, msg, ...)
+        if self.attached_actor then
+            if type(self.attached_actor[msg]) == "function" then
+                self.attached_actor:msg(self, ...)
+            end
+        end
+    end
+
     self.subscribe = function(self, sub)
         -- todo: handle multiple subscriptions from same source gracefully
         table.insert(self.subscribers, sub)
@@ -69,7 +77,7 @@ function create_trigger()
     self.notify = function(self, msg, ...)
         for _, sub in ipairs(self.subscribers) do
             if type(sub[msg]) == "function" then
-                sub[msg](self, ...)
+                sub:msg(self, ...)
             end
         end
     end
@@ -97,6 +105,7 @@ function create_trigger()
         self.count = self.count + 1
 
         fixture_call(other, "on_trigger_enter")
+        self:attached_call("on_actor_enter", other)
     end
 
     self.on_collision_end = function(self, other, coll)
@@ -106,6 +115,7 @@ function create_trigger()
         end
 
         fixture_call(other, "on_trigger_exit")
+        self:attached_call("on_actor_exit", other)
     end
 
     return self
