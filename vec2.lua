@@ -205,6 +205,11 @@ function vec2:set(x, y)
     self.y = y
 end
 
+function vec2:copy(v)
+    self.x = v.x
+    self.y = v.y
+end
+
 local function new_zero() return new(0, 0) end
 local function new_unitx() return new(1, 0) end
 local function new_unity() return new(0, 1) end

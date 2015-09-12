@@ -426,7 +426,7 @@ function create_movement(collider, propertiesObj)
             end
         end
 
-        if self.is_on_ground and lvy >= 0 or self.stop_wall_slide then
+        if self.is_on_ground and lvy >= 0 and self.ramp_angle < 30 or self.stop_wall_slide then
             self.body:setGravityScale(0)
             lvy = 0
         else

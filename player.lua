@@ -101,7 +101,32 @@ function create_player_controller(player)
 
         if Input:get_button_down("flag") then
             if self.actor.flag then
-                self.actor.flag.collider.body:applyLinearImpulse(0, -1000)
+                if not self.actor.flag:is_grabbed() then
+                    self.actor.flag:grab(self.actor, Vec2(0, 0))
+                else
+                    local h = math.sign(Input:get_axis("horizontal"))
+                    local v = math.sign(Input:get_axis("vertical"))
+
+                    local force = Vec2(200, 200)
+
+                    if h == 0 then
+                        if self.facing == self.FACING_DIRECTIONS.cLeft then
+                            force.x = force.x * -1
+                        end
+                    else
+                        force.x = force.x * h
+                    end
+
+                    if v > 0 then
+                        self.actor.flag:drop()
+                        return
+                    else
+                        if h == 0 then force.x = 0 end
+                        force.y = force.y + (100 * -Input:get_axis("vertical"))
+                    end
+                    force.y = force.y * -1
+                    self.actor.flag:throw(force)
+                end
             end
         end
 
