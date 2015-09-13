@@ -35,6 +35,8 @@ function create_game()
 
         self.level = create_level("assets/map1.json")
 
+        Camera.level_bounds = self.level:get_bounds()
+
         local spawn_pos = self.level:get_spawn_position()
         self.player:set_position(spawn_pos)
         self.flag:set_position(spawn_pos)

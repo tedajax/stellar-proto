@@ -102,6 +102,15 @@ function create_level(filename)
         table.insert(self.layers, (LAYER_TYPE_FUNCTIONS[layer.type](self.properties, layer)))
     end
 
+    self.get_bounds = function(self)
+        return {
+            left = 0,
+            top = 0,
+            right = self.properties.tilewidth * self.properties.width,
+            bottom = self.properties.tileheight * self.properties.height,
+        }
+    end
+
     self.get_spawn_position = function(self)
         for _, layer in ipairs(self.layers) do
             if layer.type == "objectgroup" then

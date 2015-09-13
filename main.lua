@@ -199,5 +199,8 @@ function console_register_commands(console)
         memory      = { command_memory, "memory -- display memory usage information." },
         gotoxy      = { command_gotoxy, "gotoxy <x> <y> -- put player at position." },
         getxy       = { command_getxy, "gotoxy <x> <y> -- put player at position." },
+        timescale   = { function(ts) Timescale = ts or 1 end, "timescale <number> -- set timescale to value or reset if none provided." },
+        resetflag   = { function() Game.flag:respawn() end, "resetflag -- put the flag back at the spawn poit." },
+        kill        = { function() Game.player:respawn() end, "kill -- kill the player" },
     }
 end

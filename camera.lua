@@ -16,6 +16,7 @@ function create_camera(x, y)
     self.base_zoom = 1
     self.target = nil
     self.follow_bounds = { l = -16, r = 16, t = -16, b = -16 }
+    self.level_bounds = nil
 
     self.move = function(self, x, y)
         local x = x or 0
@@ -97,6 +98,31 @@ function create_camera(x, y)
                 ny = self.target.y - self.follow_bounds.t
             end
 
+            self:look_at(nx, ny)
+        end
+
+        if self.level_bounds then
+            local cx, cy = self.position.x, self.position.y
+            local nx, ny = cx, cy
+            if math.abs(self.level_bounds.left - self.level_bounds.right) > love.graphics.getWidth() then
+                if cx < self.level_bounds.left + love.graphics.getWidth() / 2 then
+                    nx = self.level_bounds.left + love.graphics.getWidth() / 2
+                end
+
+                if cx > self.level_bounds.right - love.graphics.getWidth() / 2 then
+                    nx = self.level_bounds.right - love.graphics.getWidth() / 2
+                end
+            end
+
+            if math.abs(self.level_bounds.top - self.level_bounds.bottom) > love.graphics.getHeight() then
+                if cy < self.level_bounds.top + love.graphics.getHeight() / 2 then
+                    ny = self.level_bounds.top + love.graphics.getHeight() / 2
+                end
+
+                if cy > self.level_bounds.bottom - love.graphics.getHeight() / 2 then
+                    ny = self.level_bounds.bottom - love.graphics.getHeight() / 2
+                end
+            end
             self:look_at(nx, ny)
         end
     end
