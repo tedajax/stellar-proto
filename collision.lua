@@ -6,7 +6,9 @@ COLLISION_TAGS = {
     cEnvironment = 4,
     cStaticEnvironment = 5,
     cFlag = 6,
-    cFlagTrigger = 7
+    cFlagTrigger = 7,
+    cPlayerSensor = 8,
+    cEnvironmentTriggers = 9,
 }
 
 COLLISION_FILTERS = {}
@@ -21,8 +23,10 @@ register_collision_filter(COLLISION_TAGS.cEnemy,                0x0002, 0x001D, 
 register_collision_filter(COLLISION_TAGS.cPlayerBullet,         0x0004, 0x0016, -1)
 register_collision_filter(COLLISION_TAGS.cEnvironment,          0x0008, 0x0027,  0)
 register_collision_filter(COLLISION_TAGS.cStaticEnvironment,    0x0010, 0x0027,  0)
-register_collision_filter(COLLISION_TAGS.cFlag,                 0x0020, 0x0018, -2)
-register_collision_filter(COLLISION_TAGS.cFlagTrigger,          0x0040, 0x0001, -2)
+register_collision_filter(COLLISION_TAGS.cFlag,                 0x0020, 0x0118, -2)
+register_collision_filter(COLLISION_TAGS.cFlagTrigger,          0x0040, 0x0080, -2)
+register_collision_filter(COLLISION_TAGS.cPlayerSensor,         0x0080, 0x015A, 0)
+register_collision_filter(COLLISION_TAGS.cEnvironmentTriggers,  0x0100, 0x00A0, 0)
 
 function get_collision_filter(tag)
     local f = COLLISION_FILTERS[COLLISION_TAGS[tag]]
@@ -155,6 +159,12 @@ function create_collision()
     self.draw_body = function(self, body)
         local fixtures = body:getFixtureList()
         for _, f in pairs(fixtures) do
+            if f:isSensor() then
+                love.graphics.setColor(255, 127, 0)
+            else
+                love.graphics.setColor(255, 0, 255)
+            end
+
             local shape = f:getShape()
 
             local bx = body:getX()

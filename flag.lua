@@ -14,18 +14,33 @@ function create_flag()
     self.collider = create_capsule(Game.collision.world, self.width / 2, self.height - self.width)
     self.collider.body:setFixedRotation(true)
     self.collider:set_filter_data(get_collision_filter("cFlag"))
+    self.collider:set_user_data(self)
     self.collider.body:setMass(1)
+    self.collider:set_friction(0)
 
     self.flag_trigger = Game.trigger_manager:add(0, 0, love.physics.newCircleShape(0, 0, 32), "cFlagTrigger")
     self.flag_trigger:attach(self)
 
     self.attached_to = nil
-    self.attached_offset = Vec2(0, 0)
 
-    self.set_position = function(self, pos)
-        self.position.x = pos.x
-        self.position.y = pos.y
-        self.collider.body:setPosition(pos.x, pos.y)
+    self.flagged_for_respawn = false
+
+    self.is_on_ground = function(self)
+        local s = self.position
+        local e = s + Vec2(0, 26)
+        local hits = Collision:ray_cast(s, e, collision_get_mask("cStaticEnvironment", "cEnvironment"))
+        return #hits > 0
+    end
+
+    self.respawn = function(self)
+        self.flagged_for_respawn = true
+    end
+
+    self.on_collision_begin = function(self, other, coll)
+        local obj = other:getUserData()
+        if obj and obj.tag == "kill" then
+            self:respawn()
+        end
     end
 
     self.on_actor_enter = function(self, sender, actor)
@@ -44,8 +59,7 @@ function create_flag()
         return self.attached_to ~= nil
     end
 
-    self.grab = function(self, actor, offset)
-        self.attached_offset:copy(offset)
+    self.grab = function(self, actor)
         self.attached_to = actor
         self.collider.body:setType("kinematic")
     end
@@ -63,6 +77,7 @@ function create_flag()
     self.set_position = function(self, pos)
         self.position:copy(pos)
         self.collider.body:setPosition(self.position:unpack())
+        self.collider.body:setLinearVelocity(0, 0)
     end
 
     self.update = function(self, dt)
@@ -70,8 +85,18 @@ function create_flag()
             self.controller:update(dt)
         end
 
+        if self.flagged_for_respawn then
+            self.flagged_for_respawn = false
+            self:set_position(Game.level:get_spawn_position())
+            self.attached_to = nil
+        end
+
         if self.attached_to then
-            self:set_position(self.attached_to.position + self.attached_offset)
+            self:set_position(self.attached_to.position + self.attached_to:get_attached_offset())
+        else
+            if self:is_on_ground() then
+                self.collider.body:setLinearVelocity(0, 0)
+            end
         end
     end
 

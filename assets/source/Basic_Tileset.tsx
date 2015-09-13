@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset name="Basic" tilewidth="32" tileheight="32" tilecount="5">
+<tileset name="Basic" tilewidth="32" tileheight="32" tilecount="6">
  <tile id="0">
   <properties>
    <property name="type" value="cWall"/>
@@ -29,5 +29,11 @@
    <property name="type" value="cRampTR"/>
   </properties>
   <image width="32" height="32" source="../tile_orange_ramp_tr.png"/>
+ </tile>
+ <tile id="5">
+  <properties>
+   <property name="type" value="cSpike"/>
+  </properties>
+  <image width="32" height="32" source="../tile_spike.png"/>
  </tile>
 </tileset>

@@ -9,6 +9,7 @@ TILE_TYPES = {
     cRampBL = 3,
     cRampTL = 4,
     cRampTR = 5,
+    cSpike = 6,
 }
 
 function create_tilemap(tilemapObj, tileset)
@@ -91,7 +92,10 @@ function create_tilemap(tilemapObj, tileset)
         for current, v in ipairs(self.tiles) do
             local t = self.tileset[v].type
             local col, row = self:index_to_xy(current):unpack()
-            if t == TILE_TYPES.cWall and usedTiles[current] == false then
+            if usedTiles[current] then
+                goto continue
+            end
+            if t == TILE_TYPES.cWall then
                 local left = col
                 local right = left
                 for x = left + 1, self.width - 1 do
@@ -127,7 +131,7 @@ function create_tilemap(tilemapObj, tileset)
                         usedTiles[i] = true
                     end
                 end
-            elseif t >= TILE_TYPES.cRampBR and t <= TILE_TYPES.cRampTR and usedTiles[current] == false then
+            elseif t >= TILE_TYPES.cRampBR and t <= TILE_TYPES.cRampTR then
                 usedTiles[current] = true
 
                 local dy = 0
@@ -203,7 +207,28 @@ function create_tilemap(tilemapObj, tileset)
                 }
 
                 wall_manager:add(properties)
+            elseif t == TILE_TYPES.cSpike then
+                usedTiles[current] = true
+                local left = col
+                local right = left
+                for x = left + 1, self.width - 1 do
+                    local i = self:xy_to_index(x, math.floor(current / self.width))
+                    if usedTiles[i] == true or self.tiles[i] ~= TILE_TYPES.cSpike then
+                        break
+                    else
+                        right = right + 1
+                    end
+                end
+
+                local top = row
+                local bottom = row
+                table.insert(walls, { l = left, r = right, t = top, b = bottom, filter = "cEnvironmentTriggers", tag = "kill", sensor = true })
+                for x = left, right do
+                    local i = self:xy_to_index(x, top)
+                    usedTiles[i] = true
+                end
             end
+            ::continue::
         end
 
         -- local p = {
@@ -227,7 +252,10 @@ function create_tilemap(tilemapObj, tileset)
             local br = self:tile_to_world_space(Vec2(w.r, w.b), "bottomright")
             local properties = {
                 type = "normal",
-                l = tl.x, r = br.x, t = tl.y, b = br.y
+                l = tl.x, r = br.x, t = tl.y, b = br.y,
+                filter = w.filter or "cStaticEnvironment",
+                tag = w.tag,
+                sensor = w.sensor or false,
             }
             wall_manager:add(properties)
         end

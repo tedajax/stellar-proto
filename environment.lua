@@ -19,9 +19,9 @@ function create_wall()
     self.shape = nil
     self.fixture = nil
 
-    self.asdf = "imawall"
-
     self.activate = function(self, properties)
+        local filter = properties.filter or "cStaticEnvironment"
+        self.tag = properties.tag or "wall"
         if properties.type == "normal" then
             local l, r, t, b = properties.l, properties.r, properties.t, properties.b
             local x = (l + r) / 2
@@ -39,7 +39,8 @@ function create_wall()
                 self.width, self.height
             )
             self.fixture = love.physics.newFixture(self.body, self.shape)
-            self.fixture:setFilterData(unpack(get_collision_filter("cStaticEnvironment")))
+            self.fixture:setFilterData(unpack(get_collision_filter(filter)))
+            self.fixture:setUserData(self)
         elseif properties.type == "ramp" then
             local first = properties.first
             local last = properties.last
@@ -60,10 +61,11 @@ function create_wall()
                 w / 2, -h / 2
             )
             self.fixture = love.physics.newFixture(self.body, self.shape)
-            self.fixture:setFilterData(unpack(get_collision_filter("cStaticEnvironment")))
+            self.fixture:setFilterData(unpack(get_collision_filter(filter)))
             self.fixture:setUserData(self)
             self.fixture:setFriction(0.1)
         end
+        self.fixture:setSensor(properties.sensor)
     end
 
     self.release = function(self)

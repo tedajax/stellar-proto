@@ -15,7 +15,7 @@ function create_game()
 
     self.collision = create_collision()
 
-    self.debug_collision = true
+    self.debug_collision = false
 
     self.init = function(self)
         self.trigger_manager = create_trigger_manager(100)
@@ -68,10 +68,9 @@ function create_game()
         self.npc_manager:render()
         self.level:render()
         if self.debug_collision then
-            love.graphics.setColor(255, 0, 255)
             self.collision:debug_render(false)
+            self.trigger_manager:render()
         end
-        self.trigger_manager:render()
         Camera:pop()
 
         -- love.graphics.setColor(0, 255, 0)

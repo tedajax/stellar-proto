@@ -20,10 +20,37 @@ function create_player()
     self.collider.body:setLinearDamping(0.1)
     self.collider:set_filter_data(get_collision_filter("cPlayer"))
     self.collider:set_user_data(self)
-
     self.collider.body:setMass(1)
 
+    self.sensor = {}
+    self.sensor.body = love.physics.newBody(Game.collision.world, 0, 0, "dynamic")
+    self.sensor.shape = love.physics.newRectangleShape(0, 0, self.width + 4, self.height + 4)
+    self.sensor.fixture = love.physics.newFixture(self.sensor.body, self.sensor.shape)
+    self.sensor.fixture:setSensor(true)
+    self.sensor.fixture:setUserData(self)
+    self.sensor.fixture:setFilterData(unpack(get_collision_filter("cPlayerSensor")))
+
+    self.image =  love.graphics.newImage("assets/test_player_sprite.png")
+
+    self.flagged_for_respawn = false
+
+    self.get_attached_offset = function()
+        if self.controller then
+            return self.controller:get_attached_offset()
+        else
+            return Vec2(0, 0)
+        end
+    end
+
+    self.respawn = function()
+        self.flagged_for_respawn = true
+    end
+
     self.on_collision_begin = function(self, other, coll)
+        local obj = other:getUserData()
+        if obj and obj.tag == "kill" then
+            self:respawn()
+        end
     end
 
     self.on_collision_end = function(self, other, coll)
@@ -34,27 +61,36 @@ function create_player()
     end
 
     self.set_position = function(self, pos)
-        self.position.x = pos.x
-        self.position.y = pos.y
-        self.collider.body:setX(self.position.x)
-        self.collider.body:setY(self.position.y)
+        self.position:copy(pos)
+        self.collider.body:setPosition(self.position:unpack())
+        self.sensor.body:setPosition(self.position:unpack())
     end
 
     self.update = function(self, dt)
         if self.controller ~= nil then
             self.controller:update(dt)
         end
+        if self.flagged_for_respawn then
+            self:set_position(Game.flag.position)
+            self.flagged_for_respawn = false
+        end
+        self.sensor.body:setPosition(self.position:unpack())
     end
 
     self.render = function(self)
-        love.graphics.setColor(180, 207, 236, 255)
-        love.graphics.rectangle(
-            "fill",
-            self.position.x - self.width / 2,
+        local sx = 1
+        local pos_x = self.position.x - self.width / 2
+        if self.controller.facing == 0 then
+            sx = -1
+            pos_x = self.position.x + self.width/ 2
+        end
+        love.graphics.setColor(255, 255, 255)
+        love.graphics.draw(self.image,
+            pos_x,
             self.position.y - self.height / 2,
-            self.width,
-            self.height
-        )
+            0,
+            sx,
+            1)
     end
 
     return self
@@ -76,6 +112,14 @@ function create_player_controller(player)
             self.actor.collider,
             movementProps
         )
+    end
+
+    self.get_attached_offset = function()
+        local offset = Vec2(24, -24)
+        if self.facing == self.FACING_DIRECTIONS.cRight then
+            offset.x = -4
+        end
+        return offset
     end
 
     self.on_update = function(self, dt)
@@ -102,12 +146,12 @@ function create_player_controller(player)
         if Input:get_button_down("flag") then
             if self.actor.flag then
                 if not self.actor.flag:is_grabbed() then
-                    self.actor.flag:grab(self.actor, Vec2(0, 0))
+                    self.actor.flag:grab(self.actor)
                 else
                     local h = math.sign(Input:get_axis("horizontal"))
                     local v = math.sign(Input:get_axis("vertical"))
 
-                    local force = Vec2(200, 200)
+                    local force = Vec2(200, 150)
 
                     if h == 0 then
                         if self.facing == self.FACING_DIRECTIONS.cLeft then
@@ -120,6 +164,8 @@ function create_player_controller(player)
                     if v > 0 then
                         self.actor.flag:drop()
                         return
+                    elseif v == 0 then
+                        force.y = force.y + (100 * -Input:get_axis("vertical"))
                     else
                         if h == 0 then force.x = 0 end
                         force.y = force.y + (100 * -Input:get_axis("vertical"))

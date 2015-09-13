@@ -1,35 +1,35 @@
 {
     "ground": {
         "acceleration": 5000,
-        "max_speed": 600,
+        "max_speed": 400,
         "max_speed_slow_rate": 50,
         "move_delay": 0,
         "stop_acceleration": 3000
     },
     "air": {
         "acceleration": 3000,
-        "max_speed": 600,
+        "max_speed": 400,
         "max_speed_slow_rate": 50,
         "move_delay": 0,
         "stop_acceleration": 3000
     },
     "max_jumps": 1,
-    "jump_force": 1100,
-    "jump_hold_force": 1200,
+    "jump_force": 900,
+    "jump_hold_force": 1000,
     "wall_slide_max_speed": 100,
     "wall_stick_delay": 0.5,
     "wall_slide_idle_time": 1.0,
     "wall_jump_request_window": 0.25,
-    "wall_jump_force": { "x": 400, "y": 1200 },
-    "wall_hop_force": { "x": 400, "y": 800 },
+    "wall_jump_force": { "x": 400, "y": 1100 },
+    "wall_hop_force": { "x": 0, "y": 0 },
     "wall_jump_response_time": 0.05,
     "raycasts": {
         "ground": {
             "distance": 4,
-            "spread": 24
+            "spread": 18
         },
         "walls": {
-            "distance": 2,
+            "distance": 4,
             "spread": 16
         }
     }

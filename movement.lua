@@ -449,12 +449,12 @@ function create_movement(collider, propertiesObj)
             end
         end
 
-        Log:debug("Wall stick: "..tostring(self.is_stuck_to_wall))
-        Log:debug("Is on ground: "..tostring(self.is_on_ground))
-        Log:debug("Wall stick timer: "..tostring(self.wall_stick_timer))
-        Log:debug("Input X: "..tostring(self.input.x))
-        Log:debug("move delay: "..tostring(self.movement_delay))
-        Log:debug("move time: "..tostring(self.movement_time))
+        -- Log:debug("Wall stick: "..tostring(self.is_stuck_to_wall))
+        -- Log:debug("Is on ground: "..tostring(self.is_on_ground))
+        -- Log:debug("Wall stick timer: "..tostring(self.wall_stick_timer))
+        -- Log:debug("Input X: "..tostring(self.input.x))
+        -- Log:debug("move delay: "..tostring(self.movement_delay))
+        -- Log:debug("move time: "..tostring(self.movement_time))
 
         for k, v in pairs(self.input) do
             self.prev_input[k] = v

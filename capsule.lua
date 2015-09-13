@@ -19,7 +19,7 @@ function create_capsule(world, radius, length, offset)
     self.head_shape = love.physics.newCircleShape(
         offset.x,
         offset.y - length / 2,
-        radius
+        radius + 2
     )
 
     self.head_fixture = love.physics.newFixture(self.body, self.head_shape)
@@ -27,7 +27,7 @@ function create_capsule(world, radius, length, offset)
     self.feet_shape = love.physics.newCircleShape(
         offset.x,
         offset.y + length / 2,
-        radius
+        radius + 2
     )
 
     self.feet_fixture = love.physics.newFixture(self.body, self.feet_shape)

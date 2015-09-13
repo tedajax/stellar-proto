@@ -104,10 +104,8 @@ function create_level(filename)
 
     self.get_spawn_position = function(self)
         for _, layer in ipairs(self.layers) do
-            Console:print(layer.type)
             if layer.type == "objectgroup" then
                 for _, control in ipairs(layer.controls) do
-                    Console:print(control.type)
                     if control.type == "spawn_point" then
                         return control.position
                     end
