@@ -43,8 +43,6 @@ function create_game()
 
         self.player_controller.bullet_manager = self.bullet_manager
 
-        self.trigger_manager:add(1168, 1074, love.physics.newRectangleShape(0, 0, 92, 92), "cStaticEnvironment")
-
         for i = 1, 10 do
             -- self.npc_manager:add(math.random(-300, 300), math.random(-150, 150))
         end

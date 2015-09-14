@@ -96,8 +96,12 @@ function love.keyreleased(key)
     Game:on_key_up(key)
 end
 
-local function command_set_gravity(gravity)
-    Game.collision.world:setGravity(0, gravity)
+local function command_set_gravity(gx, gy)
+    if gy == nil then
+        Game.collision.world:setGravity(0, gx)
+    else
+        Game.collision.world:setGravity(gx, gy)
+    end
 end
 
 local function command_reload_movement(filename)

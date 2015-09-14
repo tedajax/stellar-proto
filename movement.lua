@@ -255,6 +255,10 @@ function create_movement(collider, propertiesObj)
     end
 
     self.update = function(self, dt)
+        local gx, gy = Game.collision.world:getGravity()
+        local gravity = Vec2(gx, gy)
+        self.body:setAngle(math.rad(gravity:angle(Vec2(0, 1))))
+
         -- casts ray casts and update state determining ground/wall states
         self:check_on_ground()
         self:check_wall_contacts()

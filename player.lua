@@ -88,7 +88,7 @@ function create_player()
         love.graphics.draw(self.image,
             pos_x,
             self.position.y - self.height / 2,
-            0,
+            self.collider.body:getAngle(),
             sx,
             1)
     end

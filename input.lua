@@ -16,7 +16,7 @@ function create_input()
 
     self.get_axis = function(self, name)
         assert(self.axes[name] ~= nil)
-        return self.axes[name].value
+        return self.axes[name]:get_value()
     end
 
     self.add_button = function(self, name)
@@ -81,8 +81,18 @@ function create_axis(name)
     self.min = -1
     self.max = 1
 
+    self.deadzone = 0.1
+
     self.bindings = {}
     self.inputs = {}
+
+    self.get_value = function(self)
+        if math.abs(self.value) <= self.deadzone then
+            return 0
+        else
+            return self.value
+        end
+    end
 
     self.create_binding = function(self, key, value)
         self.bindings[key] = value
