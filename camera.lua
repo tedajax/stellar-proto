@@ -80,23 +80,23 @@ function create_camera(x, y)
 
         if self.target ~= nil then
             local cx, cy = self.position.x, self.position.y
-            local nx, ny = cx, cy
+            local nx, ny = math.lerp(cx, self.target.x, 5 * dt), math.lerp(cy, self.target.y, 5 * dt)
 
-            if self.target.x > cx + self.follow_bounds.r then
-                nx = self.target.x - self.follow_bounds.r
-            end
+            -- if self.target.x > cx + self.follow_bounds.r then
+            --     nx = self.target.x - self.follow_bounds.r
+            -- end
 
-            if self.target.x < cx + self.follow_bounds.l then
-                nx = self.target.x - self.follow_bounds.l
-            end
+            -- if self.target.x < cx + self.follow_bounds.l then
+            --     nx = self.target.x - self.follow_bounds.l
+            -- end
 
-            if self.target.y > cy + self.follow_bounds.b then
-                ny = self.target.y - self.follow_bounds.b
-            end
+            -- if self.target.y > cy + self.follow_bounds.b then
+            --     ny = self.target.y - self.follow_bounds.b
+            -- end
 
-            if self.target.y < cy + self.follow_bounds.t then
-                ny = self.target.y - self.follow_bounds.t
-            end
+            -- if self.target.y < cy + self.follow_bounds.t then
+            --     ny = self.target.y - self.follow_bounds.t
+            -- end
 
             self:look_at(nx, ny)
         end
